@@ -2,12 +2,9 @@
 
 This manual explains every screen and control in AI Follow Desk.
 
-> **Using the Chrome add-on?** Everything here applies. The add-on also has:
-> - a **Welcome** card on first use;
-> - an **Updated … ago. Update now** line under *Your AI briefing* (it refreshes by itself twice a day);
-> - per-site switches and **Delete saved posts** under **You → Posts from your browser**.
->
-> Verified sign-in is only available with the self-hosted server.
+It covers both editions. Where they differ, it's marked **(add-on)** or **(web app)**:
+- **Add-on:** the Chrome add-on from the [Quick start](00-quick-start.md). This is what most people use.
+- **Web app:** the same app as a web page or on a server; see [Installation](01-installation.md).
 
 - [Getting around](#getting-around)
 - [Today](#today) · [The briefing](#the-briefing) · [Filters and search](#filters-and-search)
@@ -22,6 +19,10 @@ This manual explains every screen and control in AI Follow Desk.
 
 ## Getting around
 
+**Opening the app (add-on):** click the red **AI Follow Desk** icon at the top right of Chrome. If you can't see it, click the puzzle-piece icon first and pin it. If the app is already open in a tab, the icon switches to that tab instead of opening another.
+
+**Opening the app (web app):** open its address, or `index.html`.
+
 The app has four sections:
 
 | Section | Icon | Use it to |
@@ -35,7 +36,7 @@ Where the sections appear depends on your screen size:
 
 | Screen | Layout |
 |---|---|
-| Phone (under 768px) | Sections in a bar at the bottom. Categories as a swipeable row of chips, and a **Filters** button. |
+| Phone (under 768px, web app only) or a narrow window | Sections in a bar at the bottom. Categories as a swipeable row of chips, and a **Filters** button. |
 | Tablet (768px and up) | Sections in the top bar |
 | Laptop (1024px and up) | A **filter sidebar** on the left |
 | Wide screen (1280px and up) | Also a **progress panel** on the right: follow progress, your accounts, starred accounts |
@@ -46,14 +47,19 @@ Each section has its own address (`#today`, `#accounts`, `#follow`, `#you`). The
 
 ## Today
 
+### Welcome card (add-on, first use only)
+
+On first use there are three short steps: **Read**, **Follow** and **Browse**. Press **Got it** to hide the card for good.
+
 ### Your AI briefing (the top card)
 
-- **Date:** the day of the latest data.
+- **Date:** the day of the latest stories.
+- **Update line (add-on):** *"Updated 3h ago. Gets new stories by itself when they are more than 12 hours old."* Press **Update now** to fetch the latest blog, news and Reddit stories straight away; a spinner shows *Getting the latest updates…*. If it fails, it says *"Couldn't update. Check your internet connection, then press Update now."*, and your current stories stay.
 - **Summary:** how many updates and accounts are in the feed. With the extension, it also says how many posts you saved from social sites.
 - **Start briefing:** opens the story-by-story reader. If you stopped partway, it says **Resume at story N**, with **Start over** next to it.
 - **Category bar:** the coloured bar shows how the updates split across the six categories. The numbers are listed underneath it.
 - **Your feeds:** once you've connected or linked accounts, there are buttons for your own X home, X notifications, LinkedIn feed, Reddit home and Instagram feed.
-- If the extension isn't installed, a line invites you to **Add the browser extension**.
+- **(web app)** If the add-on isn't installed and connected, a line invites you to **Add the browser extension**.
 
 ### The feed
 
@@ -78,8 +84,8 @@ Each update card shows:
 | Part | Meaning |
 |---|---|
 | Avatar and **name** | The account. Press the name to open [Account details](#account-details). |
-| Source label | **Official blog** (the account's own site), **News** (coverage by others), **Reddit**, or, with the extension, **Post on X**, **LinkedIn post** or **Instagram post** |
-| "via …" and time | Where it came from and how long ago. Posts saved by the extension without an exact time say "seen 2h ago". |
+| Source label | **Official blog** (the account's own site), **News** (coverage by others), **Reddit**, **Post on X**, **LinkedIn post** or **Instagram post**. The last three are posts saved as you browsed. |
+| "via …" and time | Where it came from and how long ago. Saved posts without an exact time say "seen 2h ago". |
 | Headline | Opens the original in a new tab |
 | Name tags | Other listed accounts mentioned in a Reddit post. Press one to open its details. |
 | **Follow** with the X icon | Opens the account on X so you can follow it. Shown until you mark it followed on X. |
@@ -111,7 +117,7 @@ On a laptop the filters are in the left sidebar. On a phone or tablet, use the c
 | Filter | Options | Applies to |
 |---|---|---|
 | **Categories** | All, or one of the six | Today, Accounts, Follow |
-| **Source** | All, **Social posts** (only with the extension), Official blogs, News, Reddit | Today |
+| **Source** | All, **Social posts (N)** (posts saved as you browsed; in the web app only when the add-on is connected), Official blogs, News, Reddit | Today |
 | **Accounts on** | All platforms, On X, On LinkedIn, On Instagram, On Reddit | All sections (keeps only accounts with a profile there) |
 | **Starred accounts only** | On / off | All sections |
 | **Clear filters** | Appears when any filter is on | Resets everything |
@@ -174,9 +180,11 @@ Category and other filters also apply, so you can do a sprint for just "China" o
 
 A ring shows all profile links followed, for example `40 of 165`, with one bar per platform and how many accounts are starred.
 
-### Connected accounts (with the server) / Linked accounts (without it)
+### Linked accounts (add-on and web app) / Connected accounts (web app with the server)
 
-What you see for each platform depends on how you run the app:
+**(add-on)** Type your username for each platform and press **Save username**. You can also paste your profile link. The app then adds shortcuts to your own feeds and following lists. Usernames are labelled **Not verified**, because only the server can get each platform to confirm them.
+
+**(web app)** What you see for each platform depends on whether a server is running:
 
 | State | What you see | What to do |
 |---|---|---|
@@ -195,14 +203,23 @@ Instagram sign-in only works for professional (business or creator) accounts.
 
 ### Posts from your browser
 
-This panel is for the browser extension:
+**(add-on)** While you browse X, LinkedIn, Instagram and Reddit in the same Chrome, posts from accounts on your list are saved here automatically. This panel shows:
 
-- **Not installed:** step-by-step install instructions. If you use your own address, there's also a **Copy address** button.
-- **Connected:** the number of saved posts per platform, when the last one was saved, and quick links that collect posts as you look at them:
-  - one X search per category;
+- **One row per site,** with the number of posts saved and a switch. Turn a switch off to stop saving from that site; posts already saved stay.
+- **Quick ways to collect posts,** buttons that open pages full of posts from your list:
+  - one X search per category, newest first;
   - your LinkedIn feed;
   - your Instagram feed;
   - all 7 subreddits.
+
+  Open one and scroll as usual.
+- **Delete saved posts:** press it, then press again within 4 seconds to confirm.
+
+What's saved: only posts by accounts on the list, only from pages you open, up to 1,500 posts, each kept for 30 days. Nothing leaves your browser.
+
+**(web app)**
+- **Not installed:** steps to install the add-on, plus a **Copy address** button if you use your own address.
+- **Connected:** saved posts per platform, when the last one was saved, and the same quick links.
 
 ### Appearance
 
@@ -212,7 +229,7 @@ This panel is for the browser extension:
 
 ## Feedback, undo and coming back
 
-- **Messages with Undo:** marking a follow, starring, or unlinking shows a short message at the bottom with **Undo**. It stays while your pointer is over it.
+- **Messages with Undo:** marking a follow, starring, or unlinking shows a short message at the bottom with **Undo**. It stays while your pointer is over it. Other actions, such as **Update now** or a site switch, show a short confirmation.
 - **"Did you follow…?":** after you open a profile from the app and come back to the tab, a prompt asks, for example, "Back from X. Did you follow OpenAI?". Press **Mark followed** (or **Enter**) or **Not yet** (or **Esc**).
 - **Briefing position:** remembered, so you can resume where you left off.
 

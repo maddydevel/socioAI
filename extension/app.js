@@ -225,7 +225,7 @@ function renderToday(){
     h("h2",{id:"h-today", tabindex:"-1", class:"view-title-anchor"}, "Your AI briefing"),
     IN_EXT ? h("p",{class:"note", style:"display:flex;align-items:center;gap:10px;flex-wrap:wrap", "aria-live":"polite"},
       REFRESH.busy ? [h("span",{class:"spin","aria-hidden":"true"}), "Getting the latest updates…"]
-      : [REFRESH.err ? h("span",{style:"color:var(--bad)"}, REFRESH.err) : `Updated ${ago(DATA.fetched)}. Refreshes by itself twice a day.`, h("button",{class:"linkish", data:{refresh:"1", k:"refresh"}}, "Update now")]) : null,
+      : [REFRESH.err ? h("span",{style:"color:var(--bad)"}, REFRESH.err) : `Updated ${ago(DATA.fetched)}. Gets new stories by itself when they are more than 12 hours old.`, h("button",{class:"linkish", data:{refresh:"1", k:"refresh"}}, "Update now")]) : null,
     h("p",null, `${FEED.length} updates from ${new Set(FEED.map(f=>f.a)).size} accounts${CAPTURED.length ? `, including ${CAPTURED.length} posts saved from X, LinkedIn, Instagram and Reddit as you browsed` : ""}. The briefing walks you through the ${deck.length-1} newest stories, about ten minutes of reading.`),
     h("div",{class:"cta-row"},
       h("button",{class:"btn primary", data:{brief:String(resumeAt), k:"brief-start"}}, icon("play",18), resumeAt ? `Resume at story ${resumeAt+1}` : "Start briefing"),

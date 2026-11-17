@@ -21,6 +21,8 @@ A file called `AI-Follow-Desk.zip` appears in your **Downloads** folder.
 
 You now have a folder called **AI-Follow-Desk**.
 
+> **Windows tip:** Windows often puts a second **AI-Follow-Desk** folder inside the first one. The right folder is the one that contains a file called **manifest.json**. You'll pick that folder in Step 3.
+
 > Move this folder somewhere you'll keep it, such as **Documents**. Don't delete it later: Chrome uses it to run the app.
 
 ## Step 3. Add it to Chrome
@@ -28,7 +30,7 @@ You now have a folder called **AI-Follow-Desk**.
 1. Open Chrome, click the address bar at the top, type **chrome://extensions** and press **Enter**. In Edge, type **edge://extensions**.
 2. At the top right, turn on **Developer mode**.
 3. Click **Load unpacked**. It appears at the top left once Developer mode is on.
-4. Select the **AI-Follow-Desk** folder from Step 2 and click **Select** (or **Open**).
+4. Select the **AI-Follow-Desk** folder from Step 2, the one with **manifest.json** inside, and click **Select Folder** (or **Open**).
 
 **AI Follow Desk opens in a new tab by itself.** You're done.
 
@@ -42,7 +44,7 @@ You now have a folder called **AI-Follow-Desk**.
 
 On **Today**, press **Start briefing**. The latest AI stories appear one at a time. Press **Next**, swipe, or use the arrow keys. Press **Read the story** for the full article.
 
-The app updates its stories by itself twice a day. To update right away, press **Update now** under *Your AI briefing*.
+When you open the app and its stories are more than 12 hours old, it gets new ones by itself. To update right away, press **Update now** under *Your AI briefing*.
 
 ### 2. Follow the accounts (once, about 30 minutes)
 
@@ -87,8 +89,10 @@ Everything is on the **You** page:
 ## Getting a new version
 
 1. Download the zip again (Step 1) and unzip it.
-2. Copy the new files **into your existing AI-Follow-Desk folder**, replacing the old ones. Keep the folder in the same place, so you keep your follows and settings.
+2. Copy the new files **into your existing AI-Follow-Desk folder**, replacing the old ones.
 3. Open **chrome://extensions** and press the **reload** arrow on **AI Follow Desk**.
+
+> **Keep the same folder.** Chrome links your follows, stars and saved posts to the folder you first loaded. If you load the new version from a different folder, it starts fresh.
 
 ## Removing it
 
@@ -104,6 +108,12 @@ No. Chrome shows it for any add-on you installed yourself rather than from the C
 **I closed the tab. How do I open the app again?**
 Click the red AI Follow Desk icon at the top right of Chrome. If you can't see it, click the puzzle-piece icon first.
 
+**"Manifest file is missing or unreadable" when I choose Load unpacked.**
+You picked the outer folder. Open it, and choose the **AI-Follow-Desk** folder inside, the one that contains **manifest.json**.
+
+**The download link says "Not Found".**
+The project hasn't published a download yet. Ask whoever shared the app with you to send you the **AI-Follow-Desk.zip** file directly, then continue from Step 2.
+
 **The stories haven't changed since yesterday.**
 Press **Update now** under *Your AI briefing*. If you see "Couldn't update", check your internet connection and try again.
 
@@ -111,7 +121,10 @@ Press **Update now** under *Your AI briefing*. If you see "Couldn't update", che
 Open X, LinkedIn, Instagram or Reddit in the same Chrome and look at a post from an account on the list. Also check that saving is turned on under **You → Posts from your browser**.
 
 **Does it work on my phone?**
-No. Chrome add-ons only work on computers (Windows, Mac, Linux, ChromeOS).
+Not the add-on: Chrome add-ons only work on computers (Windows, Mac, Linux, ChromeOS). If someone on your team hosts the web version, you can open its address on your phone; see [Installation](01-installation.md).
+
+**I installed it again and my follows are gone.**
+The new copy was loaded from a different folder, so Chrome treats it as a new add-on. Remove it, then load the original folder again.
 
 **Something else?**
 See [Troubleshooting](05-troubleshooting.md).

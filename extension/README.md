@@ -1,6 +1,6 @@
 # AI Follow Desk (Chrome/Edge add-on)
 
-This add-on **is the whole app**. Click its icon and AI Follow Desk opens in a tab. It refreshes its updates from public blog, news and Reddit feeds twice a day, and it gets real posts from X, LinkedIn, Instagram and Reddit without using any of their APIs.
+This add-on **is the whole app**. Click its icon and AI Follow Desk opens in a tab. When you open it and its stories are more than 12 hours old, it gets new ones from public blog, news and Reddit feeds, and it gets real posts from X, LinkedIn, Instagram and Reddit without using any of their APIs.
 
 **Not technical?** See [docs/00-quick-start.md](../docs/00-quick-start.md). It takes 3 minutes, with nothing to configure.
 

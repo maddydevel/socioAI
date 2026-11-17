@@ -2,13 +2,30 @@
 
 This guide covers everything you can set or change:
 
-1. [Server settings](#1-server-settings)
-2. [Register a sign-in app on each platform](#2-register-a-sign-in-app-on-each-platform)
-3. [Refresh the updates (data)](#3-refresh-the-updates-data)
-4. [Change the account list](#4-change-the-account-list)
+0. [The add-on needs no configuration](#0-the-add-on-needs-no-configuration)
+1. [Server settings](#1-server-settings) (web app with the server)
+2. [Register a sign-in app on each platform](#2-register-a-sign-in-app-on-each-platform) (web app with the server)
+3. [Refresh the web app's updates](#3-refresh-the-web-apps-updates)
+4. [Change the account list or news sources](#4-change-the-account-list-or-news-sources)
 5. [Deploy the server](#5-deploy-the-server)
-6. [Extension settings](#6-extension-settings)
+6. [Add-on settings and permissions](#6-add-on-settings-and-permissions)
 7. [App settings and stored data](#7-app-settings-and-stored-data)
+8. [Release a new version](#8-release-a-new-version)
+
+---
+
+## 0. The add-on needs no configuration
+
+If you use the Chrome add-on ([Quick start](00-quick-start.md)), there's nothing to set up. Everything optional is on the **You** page:
+
+| Setting | Where in the app |
+|---|---|
+| Theme | **You → Appearance**, or the icon at the top right |
+| Your usernames on X, LinkedIn, Instagram and Reddit (unverified; adds shortcuts to your own feeds) | **You → Linked accounts** |
+| Save posts per site, or delete saved posts | **You → Posts from your browser** |
+| Get new stories now | **Today → Update now** |
+
+Sections 1–5 below are for the web app and the server. Sections 6–8 also apply to the add-on.
 
 ---
 
@@ -108,9 +125,11 @@ The scope is `instagram_business_basic`. **Only professional (business or creato
 
 ---
 
-## 3. Refresh the updates (data)
+## 3. Refresh the web app's updates
 
-The feed is a snapshot. To refresh it:
+> **Add-on users can skip this section.** The add-on gets new stories by itself when you open it and the last update is more than 12 hours old. **Update now** does it straight away. If a source can't be reached, its previous stories are kept.
+
+The web app's feed is a snapshot. To refresh it:
 
 ```bash
 python3 fetch.py .
@@ -126,7 +145,7 @@ python3 fetch.py .
 
 | Source | Accounts | Window | Kept per account |
 |---|---|---|---|
-| Official blog and newsletter RSS (17 feeds) | OpenAI, Google DeepMind, NVIDIA, Hugging Face, LangChain, Together, ElevenLabs, Cursor, Qwen, Karpathy, Mollick, Chip Huyen, Raschka, Lilian Weng, Jay Alammar, Phil Schmid, Simon Willison | Last 45 days | 4 newest |
+| Official blog and newsletter RSS (16 feeds) | OpenAI, Google DeepMind, NVIDIA, Hugging Face, Together, ElevenLabs, Cursor, Qwen, Karpathy, Mollick, Chip Huyen, Raschka, Lilian Weng, Jay Alammar, Phil Schmid, Simon Willison | Last 45 days | 4 newest |
 | Reddit RSS: top posts of the week | The 7 subreddits, plus r/kimi and u/Cohere | Last 10 days | 12 per subreddit |
 | Google News RSS search | Every account | Last 7 days | 3 newest relevant headlines |
 
@@ -144,6 +163,8 @@ Then add this line, using your own folder path:
 
 This refreshes at 06:05 every day. On Windows, use Task Scheduler with the same two commands.
 
+The add-on uses the same sources, time windows and filters. They're copied from `fetch.py` into `extension/sources.js` whenever you run `./build_extension.sh`.
+
 **Fine-tuning:** the windows and limits are near the top of `fetch.py`:
 
 - `recent(..., 45)` sets the blog window;
@@ -152,7 +173,7 @@ This refreshes at 06:05 every day. On Windows, use Task Scheduler with the same 
 
 ---
 
-## 4. Change the account list
+## 4. Change the account list or news sources
 
 The accounts live in `accounts.js`, in the `RAW` list. Each row is:
 
@@ -174,25 +195,25 @@ The accounts live in `accounts.js`, in the `RAW` list. Each row is:
 
 Subreddits are in the `SUBS` list as `[name, description]`.
 
-**After editing, rebuild everything that uses the list:**
+**To include the account in fetched updates,** also edit `fetch.py`:
+
+- add a news search to `NEWS`, keyed by the account `id`;
+- optionally add its blog's RSS feed to `BLOGS`;
+- optionally add keywords to `MENTIONS`, which tags Reddit posts that mention it.
+
+**Then rebuild both editions:**
 
 ```bash
 ./build_app.sh accounts.js feed.json
 ```
 
 ```bash
-node extension/build-accounts.mjs
+./build_extension.sh
 ```
 
-Then rebuild the add-on with `./build_extension.sh`, open `chrome://extensions`, and press the reload icon on **AI Follow Desk**.
+The second command also updates the add-on's account list, its copy of the news sources, and the list of feed sites it may read (its permissions). Reload the add-on in `chrome://extensions`. To share the change, release a new version (section 8).
 
-To include the new account in fetched updates, also add it to `fetch.py`:
-
-- add a news search to `NEWS`, keyed by the account `id`;
-- optionally add its blog feed to `BLOGS`;
-- optionally add keywords to `MENTIONS`, which tags Reddit posts that mention it.
-
-Then refresh the data (section 3).
+> **Adding a blog feed?** The add-on can only read sites listed in its permissions, so a new site needs `./build_extension.sh` and a reload. Chrome may then ask users to accept the new permission when they update.
 
 ---
 
@@ -261,7 +282,7 @@ Add the daily refresh from section 3 to the same server's crontab.
 
 ---
 
-## 6. Extension settings
+## 6. Add-on settings and permissions
 
 Click the **AI Follow Desk** toolbar icon to open the app. The add-on's settings are in the app itself, under **You → Posts from your browser**:
 
@@ -269,10 +290,19 @@ Click the **AI Follow Desk** toolbar icon to open the app. The add-on's settings
 |---|---|---|
 | Save posts from X / LinkedIn / Instagram / Reddit | The switch next to each site | Turns saving on or off for that site. Saved posts stay. |
 | Delete saved posts | Below the switches (press twice to confirm) | Deletes every saved post in this browser |
-| Update now | Under *Your AI briefing* on **Today** | Fetches the latest blog, news and Reddit updates. It also happens by itself twice a day. |
+| Update now | Under *Your AI briefing* on **Today** | Fetches the latest blog, news and Reddit updates. It also happens by itself when you open the app and the stories are more than 12 hours old. |
 | Connect app | `chrome://extensions` → **Details** → **Extension options** | Adds or removes self-hosted AI Follow Desk addresses the add-on may pass posts to. Only needed if you run your own copy. |
 
 Built-in limits: up to **1,500 posts**, each kept for **30 days**. Older posts drop off automatically.
+
+**Permissions the add-on asks for, and why:**
+
+| Permission | Why |
+|---|---|
+| Read x.com, twitter.com, linkedin.com, instagram.com and reddit.com pages | To save posts from accounts on your list when **you** open those pages. It never opens them itself. |
+| Read 16 blog sites, news.google.com and www.reddit.com | To fetch their public RSS feeds for new stories |
+| Storage | To keep your saved posts, settings and latest stories in your browser |
+| Scripting | Only used by **Connect app** to pass posts to a web app address you add |
 
 Inside the add-on, the app needs no connecting. For copies of the app you run yourself, the add-on connects automatically to `http://localhost`, `http://127.0.0.1` on any port, and local copies in folders named `socioAI` or `ai-follow-desk`. Any other address needs **Connect app**.
 
@@ -289,9 +319,61 @@ Inside the add-on, the app needs no connecting. For copies of the app you run yo
 | Briefing position | Automatic | This browser (`afd:briefPos`) |
 | Verified sign-ins | **You → Connected accounts** (server only) | Encrypted cookie `afd_sess` (30 days) |
 
+**The add-on also keeps** (in Chrome's extension storage, on your computer):
+- saved posts (`items`, up to 1,500, 30 days each);
+- the latest fetched stories (`feed`);
+- the per-site switches (`enabled`);
+- the addresses added with Connect app.
+
+All of it, along with the settings above, is removed when you remove the add-on.
+
+> Chrome ties this data to the folder you loaded the add-on from. Load updates from the same folder, or the add-on starts fresh.
+
 Open tabs stay in sync. A change in one tab shows up in the others.
 
 **To reset everything in a browser,** clear this site's data. In Chrome: the padlock or site-info icon in the address bar → **Site settings** → **Delete data**. To sign out of a platform, use **Disconnect** on **You**.
+
+---
+
+## 8. Release a new version
+
+### Step 1. Bump the version
+
+Raise `"version"` in `extension/manifest.json`, for example `1.1.0` to `1.2.0`.
+
+### Step 2. Build and test
+
+```bash
+./build_extension.sh
+```
+
+```bash
+node extension/test/app-e2e.cjs /tmp
+```
+
+### Step 3. Publish the download on GitHub
+
+The Quick start's download link always points to the newest release's `AI-Follow-Desk.zip`:
+
+1. Commit and push.
+2. Open `https://github.com/maddydevel/socioAI/releases/new`.
+3. Set **Tag** to the version, for example `v1.2.0`, and the title to `AI Follow Desk 1.2.0`.
+4. Drag `dist/AI-Follow-Desk.zip` into the assets area. Keep that exact file name, because the link depends on it.
+5. Press **Publish release**.
+
+Users update by following [Quick start → Getting a new version](00-quick-start.md#getting-a-new-version).
+
+### Step 4 (optional). Publish to the Chrome Web Store
+
+The Chrome Web Store gives users a one-click **Add to Chrome**, without Developer mode, and updates them automatically.
+
+1. Register at the Chrome Web Store Developer Dashboard (a one-time $5 fee).
+2. Choose **New item** and upload `dist/AI-Follow-Desk.zip`.
+3. Fill in the listing: description, screenshots (1280×800) and the 128px icon (`extension/icons/128.png`).
+4. Fill in the privacy section. The add-on stores everything locally and sends no personal data anywhere. Explain each permission using the table in section 6.
+5. Submit for review. Reviews usually take a few days.
+
+After the first review, upload each new version's zip to the same item, and users get it automatically.
 
 ---
 

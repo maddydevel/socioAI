@@ -16,7 +16,6 @@ BLOGS = {
  "gdm": "https://deepmind.google/blog/rss.xml",
  "nvidia": "https://blogs.nvidia.com/feed/",
  "hf": "https://huggingface.co/blog/feed.xml",
- "langchain": "https://blog.langchain.com/rss/",
  "together": "https://www.together.ai/blog/rss.xml",
  "eleven": "https://elevenlabs.io/blog/rss.xml",
  "cursor": "https://cursor.com/changelog/rss.xml",

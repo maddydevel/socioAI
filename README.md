@@ -2,13 +2,15 @@
 
 A daily AI briefing and follow tracker for the 79 accounts and 7 subreddits in *The Follow List* (AI with Divyam), across X, LinkedIn, Instagram and Reddit.
 
+**Not technical? → [Quick start](docs/00-quick-start.md):** [download AI Follow Desk](https://github.com/maddydevel/socioAI/releases/latest/download/AI-Follow-Desk.zip), add it to Chrome, and you're done in 3 minutes.
+
 **Documentation:** start with [docs/README.md](docs/README.md). It covers [installation](docs/01-installation.md), [configuration](docs/02-configuration.md), the [user manual](docs/03-user-manual.md), [real-world scenarios](docs/04-scenarios.md) and [troubleshooting](docs/05-troubleshooting.md).
 
 | Part | What it does | Guide |
 |---|---|---|
 | `index.html` (built from `app.src.html`) | The app: Today feed by category, swipeable briefing, Accounts directory, Follow sprint, You (progress, accounts, theme) | this file |
 | `server/` | Optional Node server: serves the app and adds verified sign-in with X, LinkedIn, Reddit and Instagram (OAuth) | `server/README.md` |
-| `extension/` | Chrome/Edge extension that saves posts from listed accounts while you browse those sites, without their APIs | `extension/README.md` |
+| `extension/` | Chrome/Edge add-on: the whole app with self-updating data, plus saving posts from listed accounts as you browse, without their APIs. Build it with `./build_extension.sh`. | `extension/README.md` |
 | `fetch.py`, `build.py`, `build_app.sh` | Refresh the blog, news and Reddit snapshot and rebuild the app | below |
 
 ## Quick start

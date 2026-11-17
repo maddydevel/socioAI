@@ -32,7 +32,7 @@ Find your problem by what you see, then follow the fix.
 | What you see | Why | Fix |
 |---|---|---|
 | **You** says the extension isn't installed, but it is | It isn't allowed to connect to this address | Local file: name the folder `socioAI` or `ai-follow-desk`, and switch on **Allow access to file URLs** in the extension details. Your own domain: use **Connect app**. Then reload the app. |
-| Connected, but 0 posts | You haven't opened pages from listed accounts yet, or capture is switched off for that site | Use the links on **You → Posts from your browser**, and check the switches in the extension popup |
+| Connected, but 0 posts | You haven't opened pages from listed accounts yet, or capture is switched off for that site | Use the links on **You → Posts from your browser**, and check the site's switch is on |
 | X posts stopped arriving after a while | X changed its page layout | Update the X extractor in `extension/capture.js`, then reload the extension |
 | LinkedIn posts show "seen…" instead of a date | LinkedIn only shows ages such as "3h" | Expected |
 | It doesn't work inside the claude.ai preview | The preview runs in a sandboxed frame the extension can't reach | Use a local copy or the self-hosted server |

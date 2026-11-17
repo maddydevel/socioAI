@@ -1,4 +1,18 @@
-// Stores captured posts locally (chrome.storage.local). Nothing leaves your browser.
+// Opens the app when you click the toolbar icon (and once, right after installing),
+// and stores posts saved from X, LinkedIn, Instagram and Reddit. Nothing leaves your browser.
+const APP = chrome.runtime.getURL("app.html");
+
+async function openApp(hash = "today") {
+  const { appTab } = await chrome.storage.session.get("appTab");
+  if (appTab) {
+    try { const t = await chrome.tabs.update(appTab, { active: true }); await chrome.windows.update(t.windowId, { focused: true }); return; } catch { /* tab was closed */ }
+  }
+  const t = await chrome.tabs.create({ url: `${APP}#${hash}` });
+  await chrome.storage.session.set({ appTab: t.id });
+}
+chrome.action.onClicked.addListener(() => openApp());
+chrome.runtime.onInstalled.addListener(d => { if (d.reason === "install") openApp("today"); });
+
 const HOSTS = { x: /^(x|twitter)\.com$/, li: /^www\.linkedin\.com$/, ig: /^www\.instagram\.com$/, rd: /^(www|old)\.reddit\.com$/ };
 const MAX = 1500, MAX_AGE = 30 * 24 * 3600 * 1000;
 let queue = Promise.resolve();

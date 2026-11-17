@@ -184,7 +184,7 @@ Subreddits are in the `SUBS` list as `[name, description]`.
 node extension/build-accounts.mjs
 ```
 
-Then reload the extension: open `chrome://extensions` and press the reload icon on **AI Follow Desk Capture**.
+Then rebuild the add-on with `./build_extension.sh`, open `chrome://extensions`, and press the reload icon on **AI Follow Desk**.
 
 To include the new account in fetched updates, also add it to `fetch.py`:
 
@@ -263,17 +263,18 @@ Add the daily refresh from section 3 to the same server's crontab.
 
 ## 6. Extension settings
 
-Click the **AI Follow Desk Capture** icon to open these settings:
+Click the **AI Follow Desk** toolbar icon to open the app. The add-on's settings are in the app itself, under **You → Posts from your browser**:
 
 | Setting | Where | What it does |
 |---|---|---|
-| Save posts from X / LinkedIn / Instagram / Reddit | The switches in the popup | Turns capture on or off for that site. Saved posts stay. |
-| Clear saved posts | Popup (click twice to confirm) | Deletes every saved post in this browser |
-| Connect app | Popup → **Connect app** | Adds or removes AI Follow Desk addresses the extension may pass posts to |
+| Save posts from X / LinkedIn / Instagram / Reddit | The switch next to each site | Turns saving on or off for that site. Saved posts stay. |
+| Delete saved posts | Below the switches (press twice to confirm) | Deletes every saved post in this browser |
+| Update now | Under *Your AI briefing* on **Today** | Fetches the latest blog, news and Reddit updates. It also happens by itself twice a day. |
+| Connect app | `chrome://extensions` → **Details** → **Extension options** | Adds or removes self-hosted AI Follow Desk addresses the add-on may pass posts to. Only needed if you run your own copy. |
 
 Built-in limits: up to **1,500 posts**, each kept for **30 days**. Older posts drop off automatically.
 
-The extension connects automatically to `http://localhost`, `http://127.0.0.1` on any port, and local copies in folders named `socioAI` or `ai-follow-desk`. Any other address needs **Connect app**.
+Inside the add-on, the app needs no connecting. For copies of the app you run yourself, the add-on connects automatically to `http://localhost`, `http://127.0.0.1` on any port, and local copies in folders named `socioAI` or `ai-follow-desk`. Any other address needs **Connect app**.
 
 ---
 

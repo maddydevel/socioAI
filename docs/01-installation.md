@@ -1,5 +1,7 @@
 # 1. Installation
 
+> **Most people should use the [Quick start](00-quick-start.md) instead.** It installs the whole app as a Chrome add-on in 3 minutes, with nothing to configure. This guide covers the technical options: running from the source files, the verified sign-in server, and building the add-on yourself.
+
 This guide takes you from nothing to a working app. Part A is required. Parts B and C are optional, and you can add them later.
 
 - [Part A: Get the app running](#part-a-get-the-app-running) (5 minutes)
@@ -123,14 +125,18 @@ Deploy the folder to any host that runs Node 20 or later with HTTPS. See [Config
 
 ## Part C: Install the browser extension
 
-The extension saves posts from your listed accounts while you browse X, LinkedIn, Instagram and Reddit, and shows them in the app.
+The extension contains the **whole app**. Clicking its toolbar icon opens AI Follow Desk in a tab, and it refreshes its updates twice a day by itself. It also saves posts from your listed accounts while you browse X, LinkedIn, Instagram and Reddit, and passes them to any copy of the app it's connected to.
+
+> **Using it on its own?** Follow the [Quick start](00-quick-start.md); you don't need anything else from this guide. To build the add-on from source, run `./build_extension.sh`. The result is `dist/AI-Follow-Desk.zip`.
+
+The steps below are for using the extension **together with** a copy of the app you run yourself (Part A or B).
 
 ### Step 1. Load it into Chrome or Edge
 
 1. Open `chrome://extensions` (or `edge://extensions`).
 2. Switch on **Developer mode** (top right).
 3. Choose **Load unpacked** and select the `extension` folder inside `socioAI`.
-4. **AI Follow Desk Capture** appears in the list. Pin it with the puzzle-piece icon so it's easy to reach.
+4. **AI Follow Desk** appears in the list, and the app opens in a new tab. Pin it with the puzzle-piece icon so it's easy to reach.
 
 ### Step 2. Connect it to the app
 
@@ -142,7 +148,7 @@ It connects automatically if you open the app:
 If you host the app at your own address (for example `https://follow.example.com`):
 
 1. In the app, open **You → Posts from your browser** and press **Copy address**.
-2. Click the extension icon, then **Connect app**.
+2. In `chrome://extensions`, click **Details** on **AI Follow Desk**, then **Extension options**. This opens the **Connect AI Follow Desk** page.
 3. Paste the address and press **Connect**, then allow access when Chrome asks.
 
 ### Step 3. Check it works

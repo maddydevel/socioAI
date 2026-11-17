@@ -146,7 +146,7 @@ python3 fetch.py .
 node extension/build-accounts.mjs
 ```
 
-4. **Reload the extension:** in `chrome://extensions`, press reload on **AI Follow Desk Capture**.
+4. **Rebuild and reload the add-on:** run `./build_extension.sh`, then in `chrome://extensions` press reload on **AI Follow Desk**.
 5. **Check it:** Example Labs now appears in **Accounts** under Emerging labs, in the **Follow** queues for X and LinkedIn, and, once there's news or you browse its X page, in **Today**.
 6. **Commit and push**, so the deployed server and the team's extensions pick it up.
 

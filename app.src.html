@@ -500,11 +500,11 @@ dialog[open]::backdrop{background:var(--scrim)}
 <script type="application/json" id="feed-data">/*FEED*/{"fetched":"2026-11-16T00:00:00Z","items":[]}/*END*/</script>
 <script>
 /*ACCOUNTS*/
-const DATA = JSON.parse(document.getElementById("feed-data").textContent.replace("/*FEED*/","").replace("/*END*/",""));
-const BASE_FEED = DATA.items.filter(f=>BY[f.a]).sort((a,b)=>b.date.localeCompare(a.date));
+let DATA = window.AFD_FEED || JSON.parse(document.getElementById("feed-data").textContent.replace("/*FEED*/","").replace("/*END*/",""));
+let BASE_FEED = DATA.items.filter(f=>BY[f.a]).sort((a,b)=>b.date.localeCompare(a.date));
 let FEED = BASE_FEED, CAPTURED = [];
 const EXT = {connected:false, last:null};
-const FETCHED = new Date(DATA.fetched);
+let FETCHED = new Date(DATA.fetched);
 const updatesFor = id => FEED.filter(f=>f.a===id || (f.tags||[]).includes(id));
 
 /* ---------- icons (inline SVG, one stroke style) ---------- */
@@ -724,6 +724,9 @@ function renderToday(){
   const hero = h("section",{class:"brief-hero", "aria-labelledby":"h-today"},
     h("p",{class:"date", style:"margin:0"}, h("span",{class:"live","aria-hidden":"true"}), FETCHED.toLocaleDateString(undefined,{weekday:"long", day:"numeric", month:"long"})),
     h("h2",{id:"h-today", tabindex:"-1", class:"view-title-anchor"}, "Your AI briefing"),
+    IN_EXT ? h("p",{class:"note", style:"display:flex;align-items:center;gap:10px;flex-wrap:wrap", "aria-live":"polite"},
+      REFRESH.busy ? [h("span",{class:"spin","aria-hidden":"true"}), "Getting the latest updates…"]
+      : [REFRESH.err ? h("span",{style:"color:var(--bad)"}, REFRESH.err) : `Updated ${ago(DATA.fetched)}. Refreshes by itself twice a day.`, h("button",{class:"linkish", data:{refresh:"1", k:"refresh"}}, "Update now")]) : null,
     h("p",null, `${FEED.length} updates from ${new Set(FEED.map(f=>f.a)).size} accounts${CAPTURED.length ? `, including ${CAPTURED.length} posts saved from X, LinkedIn, Instagram and Reddit as you browsed` : ""}. The briefing walks you through the ${deck.length-1} newest stories, about ten minutes of reading.`),
     h("div",{class:"cta-row"},
       h("button",{class:"btn primary", data:{brief:String(resumeAt), k:"brief-start"}}, icon("play",18), resumeAt ? `Resume at story ${resumeAt+1}` : "Start briefing"),
@@ -751,7 +754,14 @@ function renderToday(){
       items.length>4 ? h("button",{class:"more", "aria-expanded":String(!!state.open[c.id]), data:{more:c.id, k:"more-"+c.id}}, state.open[c.id] ? "Show fewer" : `Show ${items.length-4} more from ${c.short}`) : null));
   }
   if (!sections.length) sections.push(h("p",{class:"empty"}, "Nothing matches these filters. ", h("button",{class:"linkish", data:{clearall:"1", k:"empty-clear"}}, "Clear filters")));
-  put($("#view-today"), hero, bar, ...sections);
+  const welcome = IN_EXT && !store.get("welcomed", false) ? h("section",{class:"panel", "aria-labelledby":"welcome-h", style:"border-color:var(--primary)"},
+    h("h3",{id:"welcome-h"}, "Welcome to AI Follow Desk"),
+    h("ol",{class:"steps-mini", style:"color:var(--fg);font-size:15.5px;gap:8px"},
+      h("li",null, h("b",null,"Read: "), "press Start briefing for today's top AI stories, one at a time."),
+      h("li",null, h("b",null,"Follow: "), "open Follow and work through the accounts on X, LinkedIn, Instagram and Reddit."),
+      h("li",null, h("b",null,"Browse: "), "use those sites as usual. Posts from your list show up here by themselves.")),
+    h("div",{class:"cta-row"}, h("button",{class:"btn primary", data:{welcomed:"1", k:"welcomed"}}, "Got it"))) : null;
+  put($("#view-today"), welcome, hero, bar, ...sections);
 }
 
 /* ---------- Accounts ---------- */
@@ -919,6 +929,7 @@ function connSection(p){
 
 /* ---------- verified sign-in (server mode) ---------- */
 async function loadAuth(){
+  if (IN_EXT){ AUTH.server = false; AUTH.checked = true; return; }
   try {
     const r = await fetch("/api/me", {credentials:"same-origin", headers:{Accept:"application/json"}, cache:"no-store"});
     if (!r.ok) throw new Error(r.status);
@@ -1011,14 +1022,50 @@ function fromCapture(c){
   return {a:c.a, via:{x:"X", li:"LinkedIn", ig:"Instagram", rd:"Reddit"}[c.p], title, body:text.slice(first.length).trim().slice(0,320), url:u,
     src: `${String(c.author||PL[c.p].name).slice(0,80)} on ${PL[c.p].name}`, date, noDate:!c.date, timeText: c.timeText ? String(c.timeText).slice(0,30) : null, captured:true, p:c.p};
 }
-addEventListener("message", e=>{
-  if (e.source!==window || e.data?.type!=="afd-ext-items" || !Array.isArray(e.data.items)) return;
-  EXT.connected = true; EXT.last = e.data.lastCapture || null;
-  CAPTURED = e.data.items.slice(0,1500).map(fromCapture).filter(Boolean);
+function applyCaptured(items, last){
+  EXT.connected = true; EXT.last = last || null;
+  CAPTURED = (items||[]).slice(0,1500).map(fromCapture).filter(Boolean);
   const seen = new Set(CAPTURED.map(f=>f.url));
   FEED = [...CAPTURED, ...BASE_FEED.filter(f=>!seen.has(f.url))].sort((a,b)=>b.date.localeCompare(a.date));
-  renderAll();
+}
+addEventListener("message", e=>{
+  if (e.source!==window || e.data?.type!=="afd-ext-items" || !Array.isArray(e.data.items)) return;
+  applyCaptured(e.data.items, e.data.lastCapture); renderAll();
 });
+/* ---------- running inside the AI Follow Desk extension: no server, no setup ---------- */
+const IN_EXT = location.protocol==="chrome-extension:" && !!globalThis.chrome?.storage?.local;
+const REFRESH = {busy:false, err:null};
+const STALE = 12*3600e3;
+function setBaseFeed(feed){
+  DATA = feed; FETCHED = new Date(feed.fetched);
+  BASE_FEED = feed.items.filter(f=>BY[f.a]).sort((a,b)=>b.date.localeCompare(a.date));
+}
+async function loadExt(){
+  const s = await chrome.storage.local.get({items:[], lastCapture:null, feed:null, enabled:{x:true,li:true,ig:true,rd:true}});
+  EXT.enabled = s.enabled;
+  if (s.feed?.fetched && s.feed.fetched > DATA.fetched) setBaseFeed(s.feed);
+  applyCaptured(s.items, s.lastCapture); renderAll();
+}
+async function refreshFeed(manual){
+  if (!IN_EXT || !window.AFD_REFRESH || REFRESH.busy) return;
+  REFRESH.busy = true; REFRESH.err = null; render();
+  try {
+    const f = await window.AFD_REFRESH();
+    if (!f.items.length) throw new Error("no items");
+    // A source that couldn't be reached keeps its previous items instead of disappearing
+    for (const via of ["Blog","News","Reddit"]) if (!f.items.some(i=>i.via===via)) f.items.push(...DATA.items.filter(i=>i.via===via));
+    f.items.sort((a,b)=>b.date.localeCompare(a.date));
+    await chrome.storage.local.set({feed:f});
+    if (manual) toast(`Updated. ${f.items.length} updates from blogs, news and Reddit.`);
+  } catch { REFRESH.err = "Couldn't update. Check your internet connection, then press Update now."; }
+  REFRESH.busy = false; renderAll();
+}
+if (IN_EXT){
+  EXT.connected = true;
+  chrome.storage.onChanged.addListener((ch, area)=>{ if (area==="local" && (ch.items || ch.feed || ch.enabled)) loadExt(); });
+  loadExt().then(()=>{ if (Date.now() - new Date(DATA.fetched) > STALE) refreshFeed(false); });
+  setInterval(()=>{ if (!document.hidden && Date.now() - new Date(DATA.fetched) > STALE) refreshFeed(false); }, 30*60e3);
+}
 const askExt = () => window.postMessage({type:"afd-ext-request"}, location.origin==="null" ? "*" : location.origin);
 addEventListener("focus", askExt);
 document.addEventListener("visibilitychange", ()=>{ if (!document.hidden) askExt(); });
@@ -1034,7 +1081,15 @@ function capturePanel(){
   const counts = Object.fromEntries(Object.keys(PL).map(p=>[p, CAPTURED.filter(f=>f.p===p).length]));
   const copyBtn = h("button",{class:"btn sm", data:{copyorigin:"1", k:"copy-origin"}}, "Copy address");
   return h("section",{class:"panel", "aria-labelledby":"you-capture", id:"capture"}, h("h3",{id:"you-capture"}, "Posts from your browser"),
-    EXT.connected ? [
+    IN_EXT ? [
+      h("p",{class:"note"}, "While you browse X, LinkedIn, Instagram and Reddit in this browser, posts from accounts on your list are saved here automatically. Nothing else is read, and nothing leaves your browser."),
+      h("div",{class:"conns"}, Object.keys(PL).map(p=>{ const on = EXT.enabled?.[p]!==false; return h("div",{class:"conn", style:"display:flex;align-items:center;gap:12px;padding:12px 14px"},
+        h("span",{class:"pbadge"}, pIcon(p,20)), h("div",{style:"flex:1;min-width:0"}, h("b",null, PL[p].name), h("span",{class:"muted", style:"display:block;font-size:14px"}, `${counts[p]} posts saved`)),
+        h("button",{class:"switch", style:"width:auto", role:"switch", "aria-checked":String(on), "aria-label":`Save posts from ${PL[p].name}`, data:{capsw:p, k:"capsw-"+p}}, h("span",{class:"track","aria-hidden":"true"}))); })),
+      h("p",{class:"note"}, "Quick ways to collect posts: open one of these and scroll as usual."),
+      h("div",{class:"linkrow"}, collectLinks()),
+      h("div",{class:"cta-row"}, h("button",{class:"linkish", style:"color:var(--bad)", data:{capclear:"1", k:"capclear"}}, state.confirmClear ? "Press again to delete all saved posts" : "Delete saved posts"))
+    ] : EXT.connected ? [
       h("div",{class:"conn-head"}, h("span",{class:"status verified"}, icon("check",16), "Extension connected"),
         h("span",{class:"muted", style:"font-size:14px"}, EXT.last ? `Last post saved ${ago(EXT.last)}` : "No posts saved yet")),
       h("div",{class:"bars"}, Object.keys(PL).map(p=>h("div",{class:"bar"}, h("div",{class:"t"}, h("span",{style:"display:inline-flex;gap:6px;align-items:center"}, pIcon(p,16), PL[p].name), h("span",null, `${counts[p]} posts`))))),
@@ -1228,6 +1283,13 @@ document.addEventListener("click", e=>{
   if (d.authcancel){ const p = d.authcancel; try { AUTH.busy?.win?.close(); } catch {} AUTH.busy = null; render(); $(`[data-k="cauth-${p}"]`)?.focus(); return announce(`${PL[p].name} sign-in cancelled`); }
   if (d.authfocus){ try { AUTH.busy?.win?.focus(); } catch {} return; }
   if (d.disconnect) return disconnect(d.disconnect);
+  if (d.refresh) return refreshFeed(true);
+  if (d.welcomed){ store.set("welcomed", true); render(); $("[data-k='brief-start']")?.focus(); return; }
+  if (d.capsw){ const p = d.capsw, en = {...(EXT.enabled||{x:true,li:true,ig:true,rd:true})}; en[p] = en[p]===false; chrome.storage.local.set({enabled:en}); return toast(en[p] ? `Saving posts from ${PL[p].name}` : `Stopped saving posts from ${PL[p].name}`); }
+  if (d.capclear){
+    if (!state.confirmClear){ state.confirmClear = true; render(); setTimeout(()=>{ state.confirmClear = false; render(); }, 4000); return; }
+    state.confirmClear = false; chrome.storage.local.set({items:[]}); return toast("Saved posts deleted");
+  }
   if (d.copyorigin){ navigator.clipboard?.writeText(location.origin).then(()=>toast("Address copied"), ()=>toast(`Copy this address: ${location.origin}`)); return; }
   if (d.connedit){ state.connEdit = d.connedit; render(); $(`[data-k="ci-${d.connedit}"]`)?.focus(); return; }
   if (d.conncancel){ state.connEdit = null; render(); $(`[data-k="ce-${d.conncancel}"]`)?.focus(); return; }

@@ -1,5 +1,7 @@
 # socioAI documentation
 
+> **Not technical? Start here: [Quick start](00-quick-start.md).** Download one file, add it to Chrome, and you're done in about 3 minutes, with nothing to configure.
+
 socioAI (the app is called **AI Follow Desk**) helps you follow the 79 AI companies, leaders, researchers and labs, plus 7 subreddits, from *The Follow List* by AI with Divyam. It works across X, LinkedIn, Instagram and Reddit.
 
 You get three things:
@@ -12,7 +14,8 @@ You get three things:
 
 | # | Guide | Read it when you want to… |
 |---|---|---|
-| 1 | [Installation](01-installation.md) | get the app, the optional server and the optional extension running |
+| 0 | [Quick start](00-quick-start.md) | install and use it in 3 minutes, with no technical steps (recommended for most people) |
+| 1 | [Installation](01-installation.md) | the technical options: running from the source, the sign-in server, building the add-on |
 | 2 | [Configuration](02-configuration.md) | set up verified sign-in, refresh the data, change the account list, or deploy |
 | 3 | [User manual](03-user-manual.md) | learn every screen and control |
 | 4 | [Real-world scenarios](04-scenarios.md) | see complete walk-throughs of typical days and set-ups |
@@ -30,7 +33,8 @@ socioAI/
 ├── build.py            puts feed.json into index.html
 ├── build_app.sh        rebuilds index.html from app.src.html + accounts.js + feed.json
 ├── server/             optional: serves the app and adds verified sign-in (OAuth)
-├── extension/          optional: Chrome/Edge extension that saves posts as you browse
+├── extension/          the Chrome/Edge add-on: the whole app, plus saving posts as you browse
+├── build_extension.sh  builds the add-on into dist/AI-Follow-Desk.zip
 └── docs/               these guides
 ```
 
@@ -38,6 +42,7 @@ socioAI/
 
 | Option | What you get | What you need |
 |---|---|---|
+| **Recommended: the Chrome add-on** ([Quick start](00-quick-start.md)) | Everything: the briefing, the follow tracker, social posts as you browse, and updates twice a day by itself | Chrome or Edge on a computer |
 | **A. Just the app** | Briefing, feed, follow tracker. Usernames are saved but not verified. | A browser |
 | **B. App + server** | Everything in A, plus "Continue with X" sign-in that each platform confirms | Node 20+, HTTPS hosting and developer apps on each platform |
 | **C. Add the extension** to A or B | Real posts from X, LinkedIn, Instagram and Reddit in your feed | Chrome or Edge |

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "AI Follow Desk Capture",
-  "version": "1.0.0",
-  "description": "Saves posts from your AI Follow Desk accounts while you browse X, LinkedIn, Instagram and Reddit, and shows them in AI Follow Desk. Everything stays in your browser.",
+  "name": "AI Follow Desk",
+  "version": "1.1.0",
+  "description": "Your daily AI briefing: updates from 79 AI companies, leaders and researchers, a follow tracker, and posts saved as you browse X, LinkedIn, Instagram and Reddit.",
   "permissions": [
     "storage",
     "scripting"
@@ -15,8 +15,11 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_popup": "popup.html",
-    "default_title": "AI Follow Desk Capture"
+    "default_title": "Open AI Follow Desk",
+    "default_icon": {
+      "16": "icons/16.png",
+      "32": "icons/32.png"
+    }
   },
   "options_page": "options.html",
   "content_scripts": [
@@ -63,5 +66,31 @@
         "https://old.reddit.com/*"
       ]
     }
-  ]
+  ],
+  "host_permissions": [
+    "https://blogs.nvidia.com/*",
+    "https://cursor.com/*",
+    "https://deepmind.google/*",
+    "https://elevenlabs.io/*",
+    "https://huggingface.co/*",
+    "https://huyenchip.com/*",
+    "https://karpathy.bearblog.dev/*",
+    "https://lilianweng.github.io/*",
+    "https://magazine.sebastianraschka.com/*",
+    "https://news.google.com/*",
+    "https://newsletter.languagemodels.co/*",
+    "https://openai.com/*",
+    "https://qwenlm.github.io/*",
+    "https://simonwillison.net/*",
+    "https://www.oneusefulthing.org/*",
+    "https://www.philschmid.de/*",
+    "https://www.reddit.com/*",
+    "https://www.together.ai/*"
+  ],
+  "icons": {
+    "16": "icons/16.png",
+    "32": "icons/32.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  }
 }

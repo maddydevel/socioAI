@@ -2,6 +2,13 @@
 
 This manual explains every screen and control in AI Follow Desk.
 
+> **Using the Chrome add-on?** Everything here applies. The add-on also has:
+> - a **Welcome** card on first use;
+> - an **Updated … ago. Update now** line under *Your AI briefing* (it refreshes by itself twice a day);
+> - per-site switches and **Delete saved posts** under **You → Posts from your browser**.
+>
+> Verified sign-in is only available with the self-hosted server.
+
 - [Getting around](#getting-around)
 - [Today](#today) · [The briefing](#the-briefing) · [Filters and search](#filters-and-search)
 - [Accounts](#accounts) · [Account details](#account-details)

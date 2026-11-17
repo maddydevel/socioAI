@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Connect AI Follow Desk</title>
+<style>
+  :root{color-scheme:light dark;--bg:light-dark(#FAF7F6,#121014);--card:light-dark(#FFFFFF,#1B181D);--fg:light-dark(#1F1314,#F3EEEE);--muted:light-dark(#5A5F6B,#ABA5AE);--line:light-dark(#E8DEDB,#322C36);--red:#DC2626;--bad:light-dark(#B91C1C,#FF8A80)}
+  body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+  main{max-width:620px;margin:40px auto;padding:0 16px;display:grid;gap:18px}
+  h1{margin:0;font-size:28px}
+  p{margin:0;color:var(--muted)}
+  section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:12px}
+  label{font-weight:600}
+  .hint{font-size:14px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  input{flex:1 1 260px;min-width:0;height:44px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font:inherit;background:var(--bg);color:inherit}
+  input[aria-invalid="true"]{border-color:var(--bad)}
+  button{min-height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--line);background:transparent;color:inherit;font:inherit;font-weight:600;cursor:pointer}
+  button.primary{background:var(--red);border-color:var(--red);color:#fff}
+  .err{color:var(--bad);font-weight:500;font-size:14px}
+  ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+  li{display:flex;align-items:center;gap:10px;justify-content:space-between;border:1px solid var(--line);border-radius:10px;padding:8px 12px;overflow-wrap:anywhere}
+  :focus-visible{outline:3px solid #1E40AF;outline-offset:2px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Connect AI Follow Desk</h1>
+  <p>The extension hands the posts you've collected to AI Follow Desk pages only. It already works with <b>localhost</b> and with a local copy in a folder named <b>ai-follow-desk</b>. Add your own address if you host AI Follow Desk elsewhere.</p>
+  <section aria-labelledby="addTitle">
+    <label id="addTitle" for="origin">AI Follow Desk address</label>
+    <span class="hint" id="hint">Copy it from the You screen in AI Follow Desk, for example https://follow.example.com</span>
+    <span class="err" id="err" hidden></span>
+    <form class="row" id="form" novalidate>
+      <input id="origin" type="url" inputmode="url" autocomplete="url" placeholder="https://" aria-describedby="hint err" required>
+      <button class="primary" type="submit">Connect</button>
+    </form>
+    <p class="hint">Chrome asks you to allow access to that address. The extension only runs its small connector there.</p>
+  </section>
+  <section aria-labelledby="listTitle">
+    <label id="listTitle">Connected addresses</label>
+    <ul id="list"></ul>
+  </section>
+</main>
+<script src="options.js"></script>
+</body>
+</html>

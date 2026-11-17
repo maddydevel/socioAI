@@ -1,0 +1,6 @@
+# local backups and build outputs
+index.v*.html
+*.zip
+node_modules/
+server/.env
+.DS_Store

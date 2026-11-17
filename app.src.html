@@ -1,0 +1,1341 @@
+<title>AI Follow Desk</title>
+<meta name="color-scheme" content="light dark">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500..700&family=Roboto:wght@400;500;700&display=swap">
+<style>
+/* Design system (UI UX Pro Max, "news aggregator social feed reader AI"):
+   Pattern: briefing-first, one primary CTA per screen. Style: Minimalism & Swiss, editorial.
+   Type: Newsreader (headlines) + Roboto (UI/body, 16px base). Colour: breaking red primary, link blue accent.
+   Layout (mobile-first): 375 → single column + bottom nav · 768 → top nav · 1024 → filter sidebar · 1280 → progress rail.
+   Motion tokens: enter ease-out, exit faster (65%), spring for sheets/toasts/press; all gated by reduced motion. */
+:root{
+  color-scheme:light dark;
+  --bg:light-dark(#FAF7F6,#121014);
+  --card:light-dark(#FFFFFF,#1B181D);
+  --card-2:light-dark(#F3EEEC,#24202A);
+  --border:light-dark(#E8DEDB,#322C36);
+  --border-strong:light-dark(#C9BCB8,#4C4452);
+  --fg:light-dark(#1F1314,#F3EEEE);
+  --muted:light-dark(#5A5F6B,#ABA5AE);
+  --primary:light-dark(#DC2626,#DC2626);
+  --on-primary:#FFFFFF;
+  --primary-soft:light-dark(#FDE8E8,#3A1719);
+  --accent:light-dark(#1E40AF,#9DB6FF);
+  --accent-soft:light-dark(#E6ECFB,#1D2747);
+  --ok:light-dark(#15803D,#6EDB95);
+  --ok-soft:light-dark(#DFF3E6,#14301F);
+  --bad:light-dark(#B91C1C,#FF8A80);
+  --av-ink:light-dark(#FFFFFF,#141116);
+  --scrim:light-dark(rgb(31 19 20 / .42),rgb(0 0 0 / .62));
+  --e1:light-dark(0 1px 2px rgb(31 19 20 / .06),0 1px 2px rgb(0 0 0 / .4));
+  --e2:light-dark(0 6px 20px rgb(31 19 20 / .10),0 8px 24px rgb(0 0 0 / .5));
+  --e3:light-dark(0 18px 48px rgb(31 19 20 / .18),0 18px 48px rgb(0 0 0 / .6));
+  --x:var(--fg); --li:light-dark(#0A66C2,#5AA2EE); --ig:light-dark(#C13584,#E77AB4); --rd:light-dark(#D93A00,#FF7A45);
+  --c1:light-dark(#2563EB,#7FA6F5); --c2:light-dark(#C2410C,#F3925F); --c3:light-dark(#7C3AED,#B999F2);
+  --c4:light-dark(#0F766E,#4FCDB8); --c5:light-dark(#BE185D,#F07FB5); --c6:light-dark(#B45309,#F0B45E);
+  --serif:"Newsreader",Georgia,"Times New Roman",serif;
+  --sans:"Roboto",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r-sm:8px; --r:12px; --r-lg:18px;
+  --d1:120ms; --d2:200ms; --d3:320ms; --d4:460ms;
+  --ease-out:cubic-bezier(.22,1,.36,1); --ease-in:cubic-bezier(.55,0,1,.45); --spring:cubic-bezier(.34,1.36,.64,1);
+  --top-h:60px; --bottom-h:64px;
+  --z-sticky:10; --z-nav:20; --z-toast:40;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark}}
+:root[data-theme="dark"]{color-scheme:dark}
+:root[data-theme="light"]{color-scheme:light}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+[tabindex="-1"]:focus{outline:none}
+html{scroll-padding-top:calc(var(--top-h) + 56px)}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:16px;line-height:1.55;font-size-adjust:.52;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--card)}
+h1,h2,h3,h4{margin:0;font-size-adjust:none}
+a{color:inherit}
+button,input,select{font:inherit;color:inherit}
+button,[role="button"],a,select,label[for]{cursor:pointer}
+svg{flex:none}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.muted{color:var(--muted)}
+.skip{position:fixed;left:max(16px,env(safe-area-inset-left,0px));top:-80px;z-index:60;background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:var(--r-sm);font-weight:700;text-decoration:none}
+.skip:focus{top:calc(env(safe-area-inset-top,0px) + 8px)}
+
+/* press feedback + colour transitions (state changes never snap) */
+.btn,.icon-btn,.chip,.nav a,.bnav a,.seg button,.plat,.tag,.who,.side-cat,.more{transition:background-color var(--d2) var(--ease-out),border-color var(--d2) var(--ease-out),color var(--d2) var(--ease-out),scale var(--d1) var(--spring)}
+.btn:active,.icon-btn:active,.chip:active,.seg button:active,.plat a:active,.plat button:active,.side-cat:active,.bnav a:active{scale:.96}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;border:1px solid var(--border-strong);background:var(--card);font-weight:500;font-size:15px;text-decoration:none;white-space:nowrap}
+.btn:hover{border-color:var(--fg)}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:var(--on-primary);font-weight:700}
+.btn.primary:hover{background:color-mix(in srgb,var(--primary) 88%,#000)}
+.btn.quiet{border-color:transparent;background:transparent}
+.btn.quiet:hover{background:var(--card-2)}
+.btn.sm{min-height:36px;padding:0 14px;font-size:14px}
+.icon-btn{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:999px;border:0;background:transparent;color:var(--fg)}
+.icon-btn:hover{background:var(--card-2)}
+.linkish{border:0;background:none;padding:0;color:var(--accent);font-weight:500;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+.linkish:hover{text-decoration-thickness:2px}
+
+/* Top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:var(--z-nav);background:color-mix(in srgb,var(--card) 88%,transparent);backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--border)}
+.top-in{height:var(--top-h);display:flex;align-items:center;gap:12px;max-width:1440px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:auto;min-width:0}
+.brand-mark{width:34px;height:34px;border-radius:10px;background:var(--primary);display:grid;place-items:center;color:#fff}
+.brand b{font-family:var(--serif);font-size:21px;font-weight:700;letter-spacing:-.01em;white-space:nowrap}
+.nav{display:none;gap:4px}
+.nav a{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px;border-radius:999px;text-decoration:none;font-weight:500;color:var(--muted)}
+.nav a:hover{color:var(--fg);background:var(--card-2)}
+.nav a[aria-current="page"]{color:var(--fg);background:var(--card-2);font-weight:700}
+.me-btn{position:relative}
+.me-btn .dot{position:absolute;top:8px;right:8px;width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 2px var(--card)}
+.badge-n{font-size:12px;font-weight:700;background:var(--card-2);border-radius:999px;padding:1px 7px;color:var(--muted)}
+
+/* Bottom nav (mobile) */
+.bnav{position:fixed;inset:auto 0 0 0;z-index:var(--z-nav);display:grid;grid-template-columns:repeat(4,1fr);background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:saturate(1.4) blur(12px);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.bnav a{height:var(--bottom-h);display:grid;place-items:center;align-content:center;gap:2px;text-decoration:none;font-size:12px;font-weight:500;color:var(--muted);position:relative}
+.bnav a svg{transition:translate var(--d2) var(--spring)}
+.bnav a[aria-current="page"]{color:var(--primary);font-weight:700}
+.bnav a[aria-current="page"] svg{translate:0 -2px}
+.bnav a[aria-current="page"]::before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--primary)}
+
+/* Shell */
+.shell{max-width:1440px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-bottom:calc(var(--bottom-h) + env(safe-area-inset-bottom,0px) + 24px);display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
+.side,.rail{display:none}
+main{min-width:0}
+main:focus{outline:none}
+
+/* Toolbar: search, filters, category rail */
+.toolbar{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--top-h));z-index:var(--z-sticky);background:var(--bg);padding-block:12px 10px;display:grid;gap:10px;margin-inline:-4px;padding-inline:4px}
+.tool-row{display:flex;gap:8px;align-items:center}
+.search{flex:1;min-width:0;display:flex;align-items:center;gap:10px;height:46px;padding:0 14px;border-radius:999px;background:var(--card);border:1px solid var(--border);box-shadow:var(--e1);transition:border-color var(--d2),box-shadow var(--d2)}
+.search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.search input{border:0;outline:none;background:transparent;width:100%;min-width:0;height:100%;font-size:16px}
+.search kbd{font:12px var(--sans);color:var(--muted);border:1px solid var(--border);border-radius:5px;padding:1px 6px}
+.filter-btn{position:relative}
+.filter-btn .n{position:absolute;top:4px;right:4px;min-width:18px;height:18px;border-radius:9px;background:var(--primary);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 4px}
+.rail-chips{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x proximity;overscroll-behavior-x:contain;scrollbar-width:none;margin-inline:-16px;padding:2px 16px;scroll-padding-inline:16px}
+.rail-chips::-webkit-scrollbar{display:none}
+.chip{flex:none;scroll-snap-align:start;display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--border);background:var(--card);font-size:14.5px;font-weight:500;white-space:nowrap}
+.chip:hover{border-color:var(--border-strong)}
+.chip .dot{width:9px;height:9px;border-radius:50%;background:var(--cat)}
+.chip .n{font-size:12.5px;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.chip[aria-pressed="true"] .n{color:inherit;opacity:.75}
+
+/* Sidebar (desktop filters) */
+.side-in{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--top-h) + 16px);display:grid;gap:22px;padding-top:16px;max-height:calc(100dvh - var(--top-h) - 32px);overflow:auto;scrollbar-width:thin}
+.side h2,#filterDlg .dlg-body h2{font:700 13px/1.4 var(--sans);color:var(--muted);margin:0 0 8px 10px;letter-spacing:.02em}
+#filterDlg .dlg-body h2{margin-left:0}
+.seg button[aria-pressed="true"] .pi,.chip[aria-pressed="true"] .pi{color:currentColor}
+.side-list{display:grid;gap:2px}
+.side-cat{display:flex;align-items:center;gap:10px;width:100%;min-height:42px;padding:0 10px;border:0;border-radius:10px;background:transparent;text-align:left;font-size:15px;font-weight:500;color:var(--fg)}
+.side-cat:hover{background:var(--card-2)}
+.side-cat .dot{width:10px;height:10px;border-radius:3px;background:var(--cat)}
+.side-cat .n{margin-left:auto;font-size:13px;color:var(--muted)}
+.side-cat[aria-pressed="true"]{background:var(--card);box-shadow:var(--e1),inset 3px 0 0 var(--cat);font-weight:700}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{min-height:38px;padding:0 12px;border-radius:999px;border:1px solid var(--border);background:var(--card);font-size:14px;font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.field-s{display:grid;gap:6px}
+.field-s label{font-size:14px;font-weight:500}
+.field-s select{height:44px;border:1px solid var(--border);border-radius:10px;background:var(--card);padding:0 10px;font-size:15px}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:44px;padding:0 4px 0 0;border:0;background:none;font-size:15px;font-weight:500;text-align:left}
+.switch .track{width:44px;height:26px;border-radius:13px;background:var(--border-strong);position:relative;transition:background-color var(--d2)}
+.switch .track::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgb(0 0 0 / .3);transition:translate var(--d2) var(--spring)}
+.switch[aria-checked="true"] .track{background:var(--fg)}
+.switch[aria-checked="true"] .track::after{translate:18px 0}
+.clear{justify-self:start}
+
+/* Views */
+.view{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;padding-top:6px}
+.view[hidden]{display:none}
+.view-title{font-family:var(--serif);font-size:clamp(28px,4vw,36px);font-weight:700;letter-spacing:-.015em;line-height:1.1;text-wrap:balance}
+.view-title:focus{outline:none}
+.lede{margin:6px 0 0;color:var(--muted);max-width:62ch}
+
+/* Briefing hero */
+.brief-hero{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:22px;display:grid;gap:16px;box-shadow:var(--e1);position:relative;overflow:hidden}
+.brief-hero .date{font-size:14px;font-weight:500;color:var(--primary);display:flex;align-items:center;gap:8px}
+.brief-hero .date .live{width:8px;height:8px;border-radius:50%;background:var(--primary)}
+@media (prefers-reduced-motion: no-preference){.brief-hero .date .live{animation:pulse 2.4s var(--ease-out) infinite}}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--primary) 55%,transparent)}70%,100%{box-shadow:0 0 0 9px transparent}}
+.brief-hero h2{font-family:var(--serif);font-size:clamp(30px,5vw,44px);line-height:1.05;letter-spacing:-.02em;text-wrap:balance}
+.brief-hero p{margin:0;color:var(--muted);max-width:58ch}
+.cta-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;min-width:0}
+.mix{display:grid;gap:8px}
+.mix-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--card-2);gap:2px}
+.mix-bar span{background:var(--cat);flex-grow:var(--n);transform-origin:left}
+@media (prefers-reduced-motion: no-preference){.mix-bar.intro span{animation:grow var(--d4) var(--ease-out) both;animation-delay:calc(var(--i) * 60ms)}}
+@keyframes grow{from{scale:0 1}}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:9px;height:9px;border-radius:3px;background:var(--cat)}
+.feeds-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.feeds-row .lbl{font-size:14px;font-weight:700;margin-right:4px}
+
+/* Feed */
+.cat-sec{display:grid;gap:4px;content-visibility:auto;contain-intrinsic-size:auto 640px}
+.cat-head{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;padding-block:8px 6px}
+.cat-head .dot{width:12px;height:12px;border-radius:4px;background:var(--cat)}
+.cat-head h3{font-family:var(--serif);font-size:24px;font-weight:700;letter-spacing:-.01em}
+.cat-head .count{font-size:14px;color:var(--muted)}
+.cat-head .live{margin-left:auto;display:flex;gap:6px}
+.list{display:grid;gap:10px}
+.item{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;display:grid;gap:8px;min-width:0;transition:border-color var(--d2),box-shadow var(--d2)}
+.item:hover{border-color:var(--border-strong);box-shadow:var(--e2)}
+.item.enter{animation:rise var(--d3) var(--ease-out) both;animation-delay:calc(var(--n) * 40ms)}
+@keyframes rise{from{opacity:0;translate:0 12px}}
+.meta{display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap;font-size:13.5px;color:var(--muted);min-width:0}
+.who{border:0;background:none;padding:0;font-weight:700;color:var(--fg);font-size:14.5px}
+.who:hover{text-decoration:underline}
+.kind{display:inline-flex;align-items:center;gap:4px;font-weight:500;color:var(--kc)}
+.item h4{font-family:var(--serif);font-size:20px;line-height:1.28;font-weight:600;letter-spacing:-.005em;text-wrap:pretty;overflow-wrap:anywhere}
+.item h4 a{text-decoration:none}
+.item h4 a:hover{color:var(--accent);text-decoration:underline;text-underline-offset:3px}
+.item p{margin:0;color:var(--muted);font-size:15px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.acts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:2px}
+.acts .spacer{flex:1}
+.tag{border:0;background:var(--card-2);border-radius:999px;min-height:32px;padding:0 12px;font-size:13.5px;font-weight:500}
+.tag:hover{background:var(--accent-soft)}
+.star{border:0;background:transparent;width:40px;height:40px;border-radius:999px;display:grid;place-items:center;color:var(--muted);transition:color var(--d2),background-color var(--d2)}
+.star:hover{background:var(--card-2)}
+.star[aria-pressed="true"]{color:#E7A10B}
+.star[aria-pressed="true"] svg path{fill:currentColor}
+.star.pop svg{animation:pop var(--d3) var(--spring)}
+@keyframes pop{40%{scale:1.3}}
+.more{border:1px dashed var(--border-strong);background:transparent;border-radius:var(--r);min-height:46px;font-weight:700;color:var(--fg);width:100%}
+.more:hover{background:var(--card)}
+.empty{background:var(--card);border:1px dashed var(--border-strong);border-radius:var(--r);padding:18px;color:var(--muted);margin:0}
+
+.av{width:var(--s,36px);height:var(--s,36px);border-radius:28%;display:grid;place-items:center;font-weight:700;font-size:calc(var(--s,36px) * .38);flex:none;color:var(--av-ink);background:var(--cat)}
+.av.person{border-radius:50%}
+
+/* Accounts (directory) */
+.dir{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px}
+.acct{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;display:grid;gap:12px;min-width:0;align-content:start;content-visibility:auto;contain-intrinsic-size:auto 220px;transition:border-color var(--d2),box-shadow var(--d2)}
+.acct:hover{border-color:var(--border-strong);box-shadow:var(--e2)}
+.acct.enter{animation:rise var(--d3) var(--ease-out) both;animation-delay:calc(min(var(--n),12) * 30ms)}
+.acct-top{display:flex;gap:12px;align-items:center;min-width:0}
+.acct-top .t{flex:1;min-width:0;display:grid}
+.acct-top .name{border:0;background:none;padding:0;font-weight:700;font-size:16.5px;text-align:left;justify-self:start;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acct-top .name:hover{text-decoration:underline}
+.acct-top .role{font-size:14px;color:var(--muted)}
+.cat-pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--muted)}
+.cat-pill i{width:8px;height:8px;border-radius:50%;background:var(--cat)}
+.row-sb{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:24px}
+.plats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.plat{display:flex;align-items:stretch;border:1px solid var(--border);border-radius:10px;overflow:hidden;min-width:0;background:var(--card)}
+.plat a{flex:1;min-width:0;display:flex;align-items:center;gap:8px;padding:0 10px;min-height:42px;text-decoration:none;font-size:14px}
+.plat a:hover{background:var(--card-2)}
+.plat .h{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}
+.plat button{border:0;border-left:1px solid var(--border);background:transparent;width:44px;display:grid;place-items:center;color:var(--muted)}
+.plat button:hover{background:var(--card-2)}
+.plat button[aria-pressed="true"]{background:var(--ok-soft);color:var(--ok)}
+.plat button[aria-pressed="true"] svg{animation:pop var(--d3) var(--spring)}
+.plat.none{border-style:dashed;color:var(--muted);background:transparent}
+.plat.none span{display:flex;align-items:center;gap:8px;padding:0 10px;min-height:42px;font-size:14px}
+.pi{color:var(--pc)}
+
+/* Follow (sprint) */
+.sprint{display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+.sprint-now{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;display:grid;gap:16px;box-shadow:var(--e1)}
+.sprint-who{display:flex;gap:14px;align-items:center}
+.sprint-who b{font-family:var(--serif);font-size:26px;line-height:1.1;display:block}
+.sprint-who span{display:block;color:var(--muted);font-size:14.5px}
+.sprint-who.swap{animation:swap var(--d3) var(--ease-out)}
+@keyframes swap{from{opacity:0;translate:16px 0}}
+.ring{position:relative;width:64px;height:64px;flex:none}
+.ring svg{rotate:-90deg;width:100%;height:100%}
+.ring circle{fill:none;stroke-width:6}
+.ring .bg{stroke:var(--card-2)}
+.ring .fg{stroke:var(--rc,var(--ok));stroke-linecap:round;transition:stroke-dashoffset var(--d4) var(--ease-out)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:14px;font-weight:700}
+.queue{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--border);border-radius:var(--r)}
+.qrow{display:flex;align-items:center;gap:12px;padding:8px 12px;border-bottom:1px solid var(--border);min-width:0;content-visibility:auto;contain-intrinsic-size:auto 58px}
+.qrow:last-child{border-bottom:0}
+.qrow .name{flex:0 1 auto;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qrow .h{flex:1 1 0;text-align:right;margin-left:auto;color:var(--muted);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.qrow.done .name{color:var(--muted);text-decoration:line-through}
+.check{flex:none;width:40px;height:40px;border-radius:50%;border:1.5px solid var(--border-strong);background:transparent;display:grid;place-items:center;color:transparent}
+.check[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:#fff}
+.check[aria-pressed="true"] svg{animation:pop var(--d3) var(--spring)}
+.subs{display:grid;gap:8px}
+.sub{display:flex;gap:4px 12px;align-items:baseline;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.sub a{font-weight:700;color:var(--rd);text-decoration:none}
+.sub a:hover{text-decoration:underline}
+.sub span{color:var(--muted);font-size:14.5px;flex:1 1 220px}
+
+/* You */
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;display:grid;gap:16px}
+.panel h3{font-family:var(--serif);font-size:22px;font-weight:700}
+.prog{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.prog .ring{width:88px;height:88px}
+.prog .ring b{font-size:18px}
+.bars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px;flex:1;min-width:220px}
+.bar{display:grid;gap:6px}
+.bar .t{display:flex;justify-content:space-between;gap:8px;font-size:14px}
+.bar .t span:last-child{color:var(--muted)}
+.meter{height:8px;border-radius:4px;background:var(--card-2);overflow:hidden}
+.meter span{display:block;height:100%;width:100%;background:var(--pc);transform-origin:left;scale:var(--v) 1;transition:scale var(--d4) var(--ease-out);border-radius:4px}
+.conns{display:grid;gap:12px}
+.conn{border:1px solid var(--border);border-radius:var(--r);padding:16px;display:grid;gap:12px;min-width:0}
+.conn.flash{animation:flash 1.2s var(--ease-out)}
+@keyframes flash{from{box-shadow:0 0 0 4px var(--accent-soft)}}
+.conn-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.conn-head h4{font-size:17px;font-weight:700}
+.pbadge{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:var(--card-2);color:var(--pc)}
+.status{margin-left:auto;font-size:13.5px;font-weight:500;padding:4px 12px;border-radius:999px;background:var(--card-2);color:var(--muted);display:inline-flex;align-items:center;gap:6px;max-width:100%}
+.status.on{background:var(--ok-soft);color:var(--ok)}
+.ident{display:flex;align-items:center;gap:12px;min-width:0}
+.ident img,.ident .av{width:48px;height:48px;border-radius:50%;object-fit:cover;flex:none;background:var(--card-2)}
+.ident b{display:block;font-size:17px}
+.ident span{display:block;color:var(--muted);font-size:14px;overflow-wrap:anywhere}
+.status.verified{background:var(--ok-soft);color:var(--ok);font-weight:700}
+.status.unverified{background:color-mix(in srgb,#E7A10B 18%,transparent);color:light-dark(#8A5A00,#F0C060)}
+.auth-btn{min-height:48px;font-size:16px}
+.btn.primary .pi{color:currentColor}
+.auth-btn[aria-busy="true"]{opacity:.85}
+.spin{width:18px;height:18px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent}
+@media (prefers-reduced-motion: no-preference){.spin{animation:spin .8s linear infinite}}
+@keyframes spin{to{rotate:1turn}}
+.alert{margin:0;display:flex;gap:8px;align-items:flex-start;background:color-mix(in srgb,var(--bad) 10%,transparent);color:var(--bad);border-radius:10px;padding:10px 12px;font-weight:500}
+.alert svg{margin-top:2px}
+.steps-mini{margin:0;padding-left:20px;color:var(--muted);font-size:14px;display:grid;gap:2px}
+details.fallback summary{cursor:pointer;color:var(--accent);font-weight:500;font-size:14.5px;min-height:32px;display:flex;align-items:center}
+details.fallback[open] summary{margin-bottom:10px}
+.welcome{margin:0;background:var(--accent-soft);border-radius:10px;padding:10px 12px;font-weight:500}
+.field{display:grid;gap:6px}
+.field label{font-weight:700;font-size:15px}
+.field .hint{font-size:14px;color:var(--muted)}
+.field .err{font-size:14px;color:var(--bad);font-weight:500;display:flex;gap:6px;align-items:center}
+.inrow{display:flex;gap:8px;flex-wrap:wrap}
+.inrow input{flex:1 1 220px;min-width:0;height:46px;border:1px solid var(--border-strong);border-radius:10px;padding:0 12px;background:var(--bg);font-size:16px;transition:border-color var(--d2),box-shadow var(--d2)}
+.inrow input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.inrow input[aria-invalid="true"]{border-color:var(--bad);box-shadow:inset 4px 0 0 var(--bad)}
+.note{margin:0;font-size:14px;color:var(--muted)}
+.linkrow{display:flex;gap:8px;flex-wrap:wrap}
+.theme-seg{display:inline-flex;background:var(--card-2);border-radius:999px;padding:4px;gap:2px}
+.theme-seg label{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:999px;font-size:14.5px;font-weight:500;color:var(--muted);transition:background-color var(--d2),color var(--d2)}
+.theme-seg input{position:absolute;opacity:0;pointer-events:none}
+.theme-seg label:has(input:checked){background:var(--card);color:var(--fg);box-shadow:var(--e1)}
+.theme-seg label:has(input:focus-visible){outline:3px solid var(--accent);outline-offset:2px}
+
+/* Right rail */
+.rail-in{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--top-h) + 16px);display:grid;gap:14px;padding-top:16px}
+.rcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;display:grid;gap:12px}
+.rcard h2{font-size:15px;font-weight:700}
+.mini-acct{display:flex;align-items:center;gap:10px;min-width:0}
+.mini-acct button{border:0;background:none;padding:0;font-weight:500;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mini-acct button:hover{text-decoration:underline}
+.lp{display:flex;gap:6px;flex-wrap:wrap}
+.lp a{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 10px;border-radius:999px;border:1px solid var(--border);text-decoration:none;font-size:13.5px;font-weight:500}
+.lp a.on{background:var(--ok-soft);border-color:transparent;color:var(--ok)}
+.lp a:hover{border-color:var(--border-strong)}
+
+/* Dialogs: bottom sheet on phones, centred card from 768px */
+dialog{border:0;padding:0;background:var(--card);color:var(--fg);box-shadow:var(--e3);overscroll-behavior:contain;
+  width:100%;max-width:100%;max-height:88dvh;margin:auto 0 0 0;border-radius:var(--r-lg) var(--r-lg) 0 0;padding-bottom:env(safe-area-inset-bottom,0px);
+  translate:0 100%;transition:translate var(--d3) var(--ease-in),opacity var(--d2),overlay var(--d3) allow-discrete,display var(--d3) allow-discrete}
+dialog[open]{translate:0 0;transition:translate var(--d4) var(--spring),opacity var(--d2),overlay var(--d4) allow-discrete,display var(--d4) allow-discrete}
+@starting-style{dialog[open]{translate:0 100%}}
+dialog::backdrop{background:transparent;transition:background-color var(--d3),overlay var(--d3) allow-discrete,display var(--d3) allow-discrete}
+dialog[open]::backdrop{background:var(--scrim)}
+@starting-style{dialog[open]::backdrop{background:transparent}}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--border-strong);margin:8px auto 0}
+.dlg-head{display:flex;gap:12px;align-items:center;padding:14px 18px 14px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--card);z-index:1}
+.dlg-head h3{font-family:var(--serif);font-size:24px;line-height:1.15}
+.dlg-body{padding:16px 18px 22px;display:grid;gap:14px}
+.dlg-body h4{font-size:15px;font-weight:700;margin-top:4px}
+.mini{display:grid;gap:8px}
+.mini a{display:grid;gap:2px;text-decoration:none;padding:12px 14px;border:1px solid var(--border);border-radius:10px;transition:border-color var(--d2)}
+.mini a:hover{border-color:var(--border-strong)}
+.mini b{font-family:var(--serif);font-weight:600;font-size:17px;line-height:1.3;overflow-wrap:anywhere}
+.mini span{font-size:13.5px;color:var(--muted)}
+
+/* Briefing reader */
+#brief{max-height:100dvh;height:100dvh;border-radius:0;background:var(--bg);display:none;flex-direction:column}
+#brief[open]{display:flex}
+.b-top{display:grid;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 12px) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
+.b-prog{display:flex;gap:4px}
+.b-prog span{flex:1;height:4px;border-radius:2px;background:var(--border);overflow:hidden}
+.b-prog span::after{content:"";display:block;height:100%;background:var(--fg);transform-origin:left;scale:0 1;transition:scale var(--d3) var(--ease-out)}
+.b-prog span.done::after{scale:1 1}
+.b-bar{display:flex;align-items:center;gap:10px}
+.b-bar .pos{font-weight:700;margin-right:auto}
+.b-track{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;min-height:0}
+.b-track::-webkit-scrollbar{display:none}
+.b-card{flex:0 0 100%;scroll-snap-align:center;scroll-snap-stop:always;overflow-y:auto;padding:8px max(16px,env(safe-area-inset-left,0px)) 24px;display:grid;align-content:start;justify-items:center}
+.b-in{width:min(680px,100%);display:grid;gap:16px;padding-top:min(6vh,48px)}
+.b-cat{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--cat);font-size:15px}
+.b-cat i{width:10px;height:10px;border-radius:3px;background:var(--cat)}
+.b-in h3{font-family:var(--serif);font-size:clamp(28px,5.4vw,44px);line-height:1.12;letter-spacing:-.015em;text-wrap:balance;overflow-wrap:anywhere}
+.b-in p{margin:0;font-size:18px;color:var(--muted);line-height:1.6;max-width:62ch}
+.b-who{display:flex;align-items:center;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:15px}
+.b-who b{color:var(--fg)}
+.b-acts{display:flex;gap:10px;flex-wrap:wrap}
+.b-done{text-align:center;justify-items:center}
+.b-done .big{width:84px;height:84px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center}
+@media (prefers-reduced-motion: no-preference){.b-card.active .b-in>*{animation:rise var(--d3) var(--ease-out) both}.b-card.active .b-in>*:nth-child(2){animation-delay:40ms}.b-card.active .b-in>*:nth-child(3){animation-delay:80ms}.b-card.active .b-in>*:nth-child(4){animation-delay:120ms}.b-card.active .b-in>*:nth-child(5){animation-delay:160ms}}
+.b-foot{display:flex;justify-content:space-between;gap:10px;padding:10px max(16px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 14px) max(16px,env(safe-area-inset-left,0px));border-top:1px solid var(--border);background:var(--card)}
+.b-foot .btn{min-width:120px}
+
+/* Toast + return prompt */
+.toast{position:fixed;left:50%;bottom:calc(var(--bottom-h) + env(safe-area-inset-bottom,0px) + 14px);z-index:var(--z-toast);translate:-50% 24px;opacity:0;visibility:hidden;
+  display:flex;align-items:center;gap:12px;width:max-content;max-width:calc(100% - 32px);background:var(--fg);color:var(--bg);border-radius:14px;padding:10px 10px 10px 16px;box-shadow:var(--e3);
+  transition:translate var(--d2) var(--ease-in),opacity var(--d1),visibility 0s var(--d2)}
+.toast.show{translate:-50% 0;opacity:1;visibility:visible;transition:translate var(--d3) var(--spring),opacity var(--d2),visibility 0s}
+.toast p{margin:0;font-size:15px;font-weight:500}
+.toast button{min-height:40px;border-radius:10px;border:0;padding:0 12px;background:color-mix(in srgb,var(--bg) 18%,transparent);color:var(--bg);font-weight:700}
+.toast button:focus-visible{outline-color:var(--bg)}
+#resume{margin:0;inset:auto;left:50%;bottom:calc(var(--bottom-h) + env(safe-area-inset-bottom,0px) + 14px);translate:-50% 0;width:min(560px,calc(100% - 32px));
+  border:0;border-radius:var(--r-lg);background:var(--card);color:var(--fg);padding:16px;box-shadow:var(--e3);border:1px solid var(--border);
+  display:none;gap:12px;align-items:center;flex-wrap:wrap;opacity:0;transition:opacity var(--d2),translate var(--d3) var(--spring),overlay var(--d3) allow-discrete,display var(--d3) allow-discrete}
+#resume:popover-open{display:flex;opacity:1}
+@starting-style{#resume:popover-open{opacity:0;translate:-50% 20px}}
+#resume p{margin:0;flex:1 1 220px;font-weight:500}
+
+/* Theme popover (header) */
+#themeMenu{margin:0;border:1px solid var(--border);border-radius:var(--r);background:var(--card);color:var(--fg);padding:8px;box-shadow:var(--e3);
+  position:fixed;inset:auto;top:calc(env(safe-area-inset-top,0px) + var(--top-h) + 6px);right:max(16px,env(safe-area-inset-right,0px));
+  opacity:0;translate:0 -6px;transition:opacity var(--d2),translate var(--d2) var(--ease-out),overlay var(--d2) allow-discrete,display var(--d2) allow-discrete}
+#themeMenu:popover-open{opacity:1;translate:0 0}
+@starting-style{#themeMenu:popover-open{opacity:0;translate:0 -6px}}
+
+/* Breakpoints */
+.me-btn{display:none}
+@media (min-width:768px){
+  .nav{display:flex}
+  .bnav{display:none}
+  .shell{padding-bottom:48px}
+  .toast,#resume{bottom:calc(env(safe-area-inset-bottom,0px) + 24px)}
+  .brief-hero{padding:30px}
+  .sprint{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);align-items:start}
+  .sprint-now{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--top-h) + 120px)}
+  dialog:not(#brief){width:min(600px,calc(100% - 48px));margin:auto;border-radius:var(--r-lg);translate:none;scale:.96;opacity:0;padding-bottom:0;
+    transition:scale var(--d2) var(--ease-in),opacity var(--d2) var(--ease-in),overlay var(--d2) allow-discrete,display var(--d2) allow-discrete}
+  dialog:not(#brief)[open]{scale:1;opacity:1;transition:scale var(--d3) var(--spring),opacity var(--d2) var(--ease-out),overlay var(--d3) allow-discrete,display var(--d3) allow-discrete}
+  @starting-style{dialog:not(#brief)[open]{scale:.96;opacity:0}}
+  .grab{display:none}
+  #brief{translate:none;opacity:0;transition:opacity var(--d2),overlay var(--d2) allow-discrete,display var(--d2) allow-discrete}
+  #brief[open]{opacity:1}
+  @starting-style{#brief[open]{opacity:0}}
+}
+@media (min-width:1024px){
+  .shell{grid-template-columns:240px minmax(0,1fr)}
+  .side{display:block}
+  .rail-chips,.filter-btn{display:none}
+}
+@media (min-width:1280px){
+  .shell{grid-template-columns:240px minmax(0,1fr) 300px}
+  .rail{display:block}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:1ms !important;animation-delay:0ms !important;animation-iteration-count:1 !important}
+  .btn:active,.icon-btn:active,.chip:active,.seg button:active,.plat a:active,.plat button:active,.side-cat:active,.bnav a:active{scale:1}
+  dialog,dialog[open]{translate:none !important;scale:1 !important}
+  @starting-style{dialog[open]{translate:none;scale:1}}
+  .toast,.toast.show{translate:-50% 0}
+  .b-track{scroll-behavior:auto}
+}
+@media (prefers-reduced-motion: no-preference){
+  .b-track{scroll-behavior:smooth}
+  ::view-transition-old(view){animation:vt-out var(--d1) var(--ease-in) both}
+  ::view-transition-new(view){animation:vt-in var(--d3) var(--ease-out) both}
+}
+@keyframes vt-out{to{opacity:0;translate:calc(var(--dir,1) * -12px) 0}}
+@keyframes vt-in{from{opacity:0;translate:calc(var(--dir,1) * 16px) 0}}
+</style>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="#today" aria-label="AI Follow Desk, today's briefing">
+      <span class="brand-mark" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="2.2" fill="currentColor"/><path d="M7.5 7.5a6.4 6.4 0 0 0 0 9M16.5 7.5a6.4 6.4 0 0 1 0 9M4.6 4.6a10.5 10.5 0 0 0 0 14.8M19.4 4.6a10.5 10.5 0 0 1 0 14.8"/></svg></span>
+      <b>AI Follow Desk</b>
+    </a>
+    <nav class="nav" aria-label="Main" id="topNav"></nav>
+    <a class="icon-btn me-btn" href="#you" id="meBtn" aria-label="You: linked accounts and progress"></a>
+    <button class="icon-btn" id="themeBtn" popovertarget="themeMenu" aria-label="Theme"></button>
+    <div id="themeMenu" popover><fieldset style="border:0;margin:0;padding:0"><legend class="sr-only">Theme</legend><div class="theme-seg" data-themegroup="menu"></div></fieldset></div>
+  </div>
+</header>
+
+<div class="shell">
+  <aside class="side" aria-label="Filters"><div class="side-in" id="sideHost"></div></aside>
+
+  <main id="main" tabindex="-1">
+    <div class="toolbar" id="toolbar">
+      <div class="tool-row">
+        <label class="search" for="q"><span id="searchIcon"></span><span class="sr-only">Search accounts and headlines</span><input id="q" type="search" placeholder="Search accounts and headlines" autocomplete="off" enterkeyhint="search"><kbd aria-hidden="true">/</kbd></label>
+        <button class="icon-btn filter-btn" id="filterBtn" aria-haspopup="dialog" aria-label="Filters"></button>
+      </div>
+      <div class="rail-chips" id="catChips" role="group" aria-label="Category"></div>
+    </div>
+
+    <section class="view" id="view-today" aria-labelledby="h-today"></section>
+    <section class="view" id="view-accounts" aria-labelledby="h-accounts" hidden></section>
+    <section class="view" id="view-follow" aria-labelledby="h-follow" hidden></section>
+    <section class="view" id="view-you" aria-labelledby="h-you" hidden></section>
+  </main>
+
+  <aside class="rail" aria-label="Your progress"><div class="rail-in" id="railHost"></div></aside>
+</div>
+
+<nav class="bnav" aria-label="Main" id="bottomNav"></nav>
+
+<dialog id="acctDlg" closedby="any" aria-labelledby="dlgTitle"></dialog>
+<dialog id="filterDlg" closedby="any" aria-labelledby="filterTitle"></dialog>
+<dialog id="brief" aria-label="Briefing"></dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"><p id="toastMsg"></p><button id="toastUndo" hidden data-k="toast-undo">Undo</button></div>
+<div id="resume" popover="manual" role="region" aria-labelledby="resumeMsg"><p id="resumeMsg"></p><div class="cta-row"><button class="btn primary sm" id="resumeYes" data-k="resume-yes" aria-describedby="resumeMsg">Mark followed</button><button class="btn sm" id="resumeNo" data-k="resume-no">Not yet</button></div></div>
+<div id="live" class="sr-only" role="status" aria-live="polite"></div>
+
+<script type="application/json" id="feed-data">/*FEED*/{"fetched":"2026-11-16T00:00:00Z","items":[]}/*END*/</script>
+<script>
+/*ACCOUNTS*/
+const DATA = JSON.parse(document.getElementById("feed-data").textContent.replace("/*FEED*/","").replace("/*END*/",""));
+const BASE_FEED = DATA.items.filter(f=>BY[f.a]).sort((a,b)=>b.date.localeCompare(a.date));
+let FEED = BASE_FEED, CAPTURED = [];
+const EXT = {connected:false, last:null};
+const FETCHED = new Date(DATA.fetched);
+const updatesFor = id => FEED.filter(f=>f.a===id || (f.tags||[]).includes(id));
+
+/* ---------- icons (inline SVG, one stroke style) ---------- */
+const ICONS = {
+  today:'<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h8M8 17h5"/>',
+  accounts:'<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.7-3 3-4.8 5.5-4.8s4.8 1.8 5.5 4.8"/><circle cx="17" cy="9" r="2.4"/><path d="M15.8 14.4c2.3.1 4 1.7 4.7 4.6"/>',
+  follow:'<circle cx="12" cy="12" r="8.5"/><path d="m8.2 12.2 2.6 2.6 5-5.4"/>',
+  you:'<circle cx="12" cy="8.5" r="3.6"/><path d="M5 20c.9-3.6 3.8-5.6 7-5.6s6.1 2 7 5.6"/>',
+  search:'<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.4-4.4"/>',
+  filter:'<path d="M4 6h16M7 12h10M10 18h4"/>',
+  star:'<path d="m12 3.5 2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z" stroke-linejoin="round"/>',
+  ext:'<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+  close:'<path d="M6 6l12 12M18 6 6 18"/>',
+  check:'<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  play:'<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke-linejoin="round"/>',
+  left:'<path d="m15 5-7 7 7 7"/>', right:'<path d="m9 5 7 7-7 7"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
+  moon:'<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
+  monitor:'<rect x="3" y="4.5" width="18" height="12" rx="1.5"/><path d="M9 20h6M12 16.5V20"/>',
+  blog:'<path d="M5 4h10l4 4v12H5z"/><path d="M14 4v5h5M8.5 13h7M8.5 16.5h5"/>',
+  news:'<rect x="3.5" y="5" width="17" height="14" rx="1.5"/><path d="M7 9h6M7 12.5h10M7 16h10"/>',
+  alert:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5.5M12 16.2v.3"/>',
+  shield:'<path d="M12 3 5 6v5.5c0 4.3 2.9 7.7 7 9.5 4.1-1.8 7-5.2 7-9.5V6z" stroke-linejoin="round"/><path d="m8.8 12.2 2.3 2.3 4.2-4.6"/>',
+  live:'<circle cx="12" cy="12" r="2"/><path d="M8 8a5.6 5.6 0 0 0 0 8M16 8a5.6 5.6 0 0 1 0 8"/>',
+};
+const PICONS = {
+  x:'<path d="M4.5 4h4l11 16h-4z" fill="currentColor" stroke="none"/><path d="M19 4l-6.3 7.2M5 20l6.3-7.2" stroke-width="1.8"/>',
+  li:'<rect x="3" y="3" width="18" height="18" rx="3.5" fill="currentColor" stroke="none"/><path d="M8 10.5V17M8 7.3v.2M11.5 17v-6.5M11.5 13.2c0-1.6 1-2.8 2.5-2.8s2.3 1 2.3 2.8V17" stroke="var(--card)" stroke-width="2"/>',
+  ig:'<rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".6" fill="currentColor"/>',
+  rd:'<circle cx="12" cy="13.5" r="7" /><circle cx="9.3" cy="13" r="1" fill="currentColor"/><circle cx="14.7" cy="13" r="1" fill="currentColor"/><path d="M9.5 16.2c1.5 1 3.5 1 5 0M12 6.5l1.2-3.3 3.3.8"/><circle cx="17.5" cy="4.3" r="1.1"/>',
+};
+function svg(paths, size=20, extra=""){
+  const t = document.createElement("template");
+  t.innerHTML = `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true" ${extra}>${paths}</svg>`;
+  return t.content.firstChild;
+}
+const icon = (n, s) => svg(ICONS[n], s);
+const pIcon = (p, s=18) => { const el = svg(PICONS[p], s); el.classList.add("pi"); el.style.setProperty("--pc", `var(${PL[p].col})`); return el; };
+
+/* ---------- safe DOM building ---------- */
+function h(tag, props, ...kids){
+  const el = document.createElement(tag);
+  for (const [k,v] of Object.entries(props||{})){
+    if (v==null || v===false) continue;
+    if (k==="class") el.className = v;
+    else if (k==="style") el.style.cssText = v;
+    else if (k==="data") Object.assign(el.dataset, v);
+    else el.setAttribute(k, v===true ? "" : v);
+  }
+  for (const c of kids.flat(Infinity)) if (c!=null && c!==false) el.append(c instanceof Node ? c : String(c));
+  return el;
+}
+// replaceChildren() would print "null" and stringify arrays; put() flattens and skips empties
+const put = (el, ...kids) => el.replaceChildren(...kids.flat(Infinity).filter(k=>k!=null && k!==false));
+const safeUrl = u => { try { const x = new URL(u); return /^https?:$/.test(x.protocol) ? x.href : null; } catch { return null; } };
+const newTab = () => h("span",{class:"sr-only"}," (opens in a new tab)");
+const ext = (href, props, ...kids) => { const u = safeUrl(href); return u ? h("a", {href:u, target:"_blank", rel:"noopener noreferrer", ...props}, ...kids, newTab()) : h("span", props, ...kids); };
+
+/* ---------- state ---------- */
+const store = {
+  get(k,d){ try { const v = localStorage.getItem("afd:"+k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k,v){ try { localStorage.setItem("afd:"+k, JSON.stringify(v)); } catch {} }
+};
+let followed = store.get("followed", {});
+let starred = store.get("starred", []);
+let conn = store.get("conn", {});
+const VIEWS = [["today","Today","today"],["accounts","Accounts","accounts"],["follow","Follow","follow"],["you","You","you"]];
+const VIEW_IDS = VIEWS.map(v=>v[0]);
+const state = {view:"today", cat:"", plat:"", q:"", starOnly:false, via:"", acct:"", sprintPlat:"x", open:{}, skipped:[], welcome:null, connEdit:null, lastKey:{}};
+
+const $ = s => document.querySelector(s);
+const catOf = id => CATS.find(c=>c.id===id);
+const initials = n => n.replace(/^r\//,"").split(/[\s.]+/).filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase();
+const avatar = (a, s=36) => h("div", {class:`av${a.person?" person":""}`, style:`--cat:var(${catOf(a.cat).color});--s:${s}px`, "aria-hidden":"true"}, initials(a.name));
+const ago = iso => { const hr = Math.max(0, (Date.now() - new Date(iso))/36e5); if (hr<1) return "just now"; if (hr<24) return Math.round(hr)+"h ago"; const d = Math.round(hr/24); return d<8 ? d+"d ago" : new Date(iso).toLocaleDateString(undefined,{day:"numeric",month:"short"}); };
+const announce = msg => { const l = $("#live"); l.textContent = ""; setTimeout(()=>{ l.textContent = msg; }, 60); };
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+const wide = matchMedia("(min-width: 1024px)");
+const VIA = {Blog:{label:"Official blog",col:"--ok",ic:"blog"}, News:{label:"News",col:"--muted",ic:"news"}, Reddit:{label:"Reddit",col:"--rd",pic:"rd"}, X:{label:"Post on X",col:"--fg",pic:"x"}, LinkedIn:{label:"LinkedIn post",col:"--li",pic:"li"}, Instagram:{label:"Instagram post",col:"--ig",pic:"ig"}};
+
+function matches(a){
+  if (state.cat && a.cat!==state.cat) return false;
+  if (state.plat && !a.links[state.plat]) return false;
+  if (state.starOnly && !starred.includes(a.id)) return false;
+  if (state.q){ const hay = (a.name+" "+a.role+" "+Object.values(a.links).map(l=>l.h).join(" ")).toLowerCase(); if (!hay.includes(state.q.toLowerCase())) return false; }
+  return true;
+}
+function feedItemOk(f){
+  if (state.via==="Social"){ if (!f.captured) return false; }
+  else if (state.via && f.via!==state.via) return false;
+  if (state.acct && f.a!==state.acct && !(f.tags||[]).includes(state.acct)) return false;
+  if (state.q){ const q = state.q.toLowerCase(); if (!(f.title+" "+f.body+" "+f.src+" "+BY[f.a].name).toLowerCase().includes(q) && !matches(BY[f.a])) return false; }
+  return true;
+}
+const activeFilters = () => [state.via, state.plat, state.starOnly, state.acct].filter(Boolean).length;
+// Lists animate in only when what they show changes, not on every re-render
+function freshList(view){ const key = [view,state.cat,state.via,state.q,state.acct,state.plat,state.starOnly,JSON.stringify(state.open)].join("|"); const fresh = state.lastKey[view]!==key; state.lastKey[view] = key; return fresh && !reduceMotion.matches; }
+
+/* ---------- toast (feedback with undo) ---------- */
+let toastTimer = null, toastUndo = null;
+function toast(msg, undo){
+  const t = $("#toast"); $("#toastMsg").textContent = msg;
+  toastUndo = undo || null; $("#toastUndo").hidden = !undo;
+  t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(hideToast, 5000);
+}
+function hideToast(){ $("#toast").classList.remove("show"); toastUndo = null; }
+$("#toast").addEventListener("pointerenter", ()=>clearTimeout(toastTimer));
+$("#toast").addEventListener("pointerleave", ()=>{ toastTimer = setTimeout(hideToast, 2500); });
+$("#toast").addEventListener("focusin", ()=>clearTimeout(toastTimer));
+$("#toastUndo").addEventListener("click", ()=>{ const u = toastUndo; hideToast(); u?.(); });
+
+/* ---------- actions ---------- */
+function setFollowed(key, on, {quiet=false}={}){
+  const [id,p] = key.split(":");
+  if (on) followed[key] = true; else delete followed[key];
+  store.set("followed", followed); renderAll();
+  if ($("#brief").open){ const cards = $("#bTrack").querySelectorAll(".b-card"); deck.forEach((f,i)=>{ if (!f.done && f.a===id){ const nc = briefCard(f,i); cards[i].replaceWith(nc); briefObs?.observe(nc); } }); setBriefIdx(briefIdx, false); }
+  if (!quiet) toast(on ? `${BY[id].name} marked followed on ${PL[p].name}` : `${BY[id].name} unmarked on ${PL[p].name}`, ()=>setFollowed(key, !on, {quiet:true}));
+}
+function toggleStar(id, btn){
+  if (starred.includes(id)){ starred = starred.filter(s=>s!==id); toast(`${BY[id].name} unstarred`, ()=>{ starred.push(id); store.set("starred",starred); renderAll(); }); }
+  else if (starred.length<5){ starred.push(id); const left = 5-starred.length; toast(`${BY[id].name} starred. Turn on their notifications on X. ${left} star${left===1?"":"s"} left.`, ()=>{ starred = starred.filter(s=>s!==id); store.set("starred",starred); renderAll(); }); }
+  else return toast("You can star five accounts. Unstar one first.");
+  store.set("starred", starred); renderAll();
+  requestAnimationFrame(()=>document.querySelectorAll(`[data-star="${CSS.escape(id)}"]`).forEach(b=>{ b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop"); }));
+}
+const starBtn = (a, k) => a.sub ? null : h("button",{class:"star","aria-pressed":String(starred.includes(a.id)),"aria-label":`Star ${a.name} for notifications`, data:{star:a.id, k}}, icon("star",20));
+
+/* ---------- navigation ---------- */
+function renderNav(){
+  const mk = (pre) => VIEWS.map(([id,label,ic])=>h("a",{href:"#"+id, "aria-current": state.view===id ? "page" : null, "data-k":`${pre}-nav-${id}`}, icon(ic, 22), h("span",null,label)));
+  put($("#topNav"), ...mk("t"));
+  put($("#bottomNav"), ...mk("b"));
+  const n = Object.keys(PL).filter(p=>isVerified(p)).length;
+  put($("#meBtn"), icon("you",22), n ? h("span",{class:"dot","aria-hidden":"true"}) : null);
+  $("#meBtn").setAttribute("aria-label", `You: ${n} of 4 accounts verified, follow progress`);
+}
+
+/* ---------- filters (sidebar on desktop, sheet on smaller screens) ---------- */
+function catCounts(){ return Object.fromEntries(CATS.map(c=>[c.id, FEED.filter(f=>BY[f.a].cat===c.id).length])); }
+function filterControls(prefix){
+  const counts = catCounts();
+  const plats = [["","All platforms"],["x","On X"],["li","On LinkedIn"],["ig","On Instagram"],["rd","On Reddit"]];
+  return [
+    wide.matches || prefix==="side" ? h("div",null, h("h2",null,"Categories"), h("div",{class:"side-list", role:"group", "aria-label":"Category"},
+      h("button",{class:"side-cat","aria-pressed":String(state.cat===""), style:"--cat:var(--fg)", data:{cat:"", k:prefix+"-cat-all"}}, h("span",{class:"dot"}), "All categories", h("span",{class:"n"}, FEED.length)),
+      CATS.map(c=>h("button",{class:"side-cat","aria-pressed":String(state.cat===c.id), style:`--cat:var(${c.color})`, data:{cat:c.id, k:prefix+"-cat-"+c.id}}, h("span",{class:"dot"}), c.name.replace(" AI companies","").replace("AI researchers & builders","Researchers & builders").replace("CEOs & industry leaders","Leaders"), h("span",{class:"n"}, counts[c.id], h("span",{class:"sr-only"}," updates")))))) : null,
+    h("div",null, h("h2",null,"Source"), h("div",{class:"seg", role:"group", "aria-label":"Source"},
+      [["","All"], EXT.connected ? ["Social",`Social posts (${CAPTURED.length})`] : null,["Blog","Official blogs"],["News","News"],["Reddit","Reddit"]].filter(Boolean).map(([v,l])=>h("button",{"aria-pressed":String(state.via===v), data:{via:v, k:prefix+"-via-"+(v||"all")}}, l)))),
+    h("div",{class:"field-s"}, h("label",{for:prefix+"-plat"},"Accounts on"), (()=>{ const s = h("select",{id:prefix+"-plat", "data-k":prefix+"-plat", "data-platsel":"1"}, plats.map(([v,l])=>h("option",{value:v}, l))); s.value = state.plat; return s; })()),
+    h("button",{class:"switch", role:"switch", "aria-checked":String(state.starOnly), data:{staronly:"1", k:prefix+"-star"}}, "Starred accounts only", h("span",{class:"track","aria-hidden":"true"})),
+    activeFilters() ? h("button",{class:"linkish clear", data:{clearall:"1", k:prefix+"-clear"}}, "Clear filters") : null,
+  ];
+}
+function renderFilters(){
+  put($("#sideHost"), ...(wide.matches ? filterControls("side") : []));
+  const d = $("#filterDlg");
+  if (d.open) put(d.querySelector(".dlg-body"), ...filterControls("sheet"));
+  const n = activeFilters();
+  put($("#filterBtn"), icon("filter",22), n ? h("span",{class:"n","aria-hidden":"true"}, n) : null);
+  $("#filterBtn").setAttribute("aria-label", n ? `Filters, ${n} active` : "Filters");
+  const counts = catCounts();
+  put($("#catChips"), 
+    h("button",{class:"chip","aria-pressed":String(state.cat===""), data:{cat:"", k:"chip-all"}}, "All", h("span",{class:"n"}, FEED.length)),
+    CATS.map(c=>h("button",{class:"chip","aria-pressed":String(state.cat===c.id), style:`--cat:var(${c.color})`, data:{cat:c.id, k:"chip-"+c.id}}, h("span",{class:"dot","aria-hidden":"true"}), c.short, h("span",{class:"n"}, counts[c.id]))));
+  $("#toolbar").hidden = state.view==="you";
+}
+function openFilters(){
+  const d = $("#filterDlg");
+  put(d, h("div",{class:"grab","aria-hidden":"true"}),
+    h("div",{class:"dlg-head"}, h("h3",{id:"filterTitle", style:"flex:1"}, "Filters"), h("button",{class:"icon-btn", data:{dlgclose:"filterDlg", k:"f-close"}, "aria-label":"Close filters"}, icon("close",22))),
+    h("div",{class:"dlg-body"}, filterControls("sheet")),
+    h("div",{class:"dlg-body", style:"padding-top:0"}, h("button",{class:"btn primary", data:{dlgclose:"filterDlg", k:"f-done"}}, "Show results")));
+  d.showModal();
+}
+
+/* ---------- Today ---------- */
+function liveLinks(accts){
+  const out = [];
+  const handles = accts.filter(a=>a.links.x).map(a=>a.links.x.h.slice(1));
+  if (handles.length) out.push(ext(`https://x.com/search?q=${encodeURIComponent(handles.map(x=>"from:"+x).join(" OR "))}&f=live`, {class:"btn sm quiet", title:"Newest posts from these accounts on X"}, pIcon("x",16), "Live"));
+  const subs = [...new Set(accts.filter(a=>a.links.rd && a.links.rd.h.startsWith("r/")).map(a=>a.links.rd.h.slice(2)))];
+  if (subs.length) out.push(ext(`https://www.reddit.com/r/${subs.join("+")}/new/`, {class:"btn sm quiet", title:"Newest posts in these subreddits"}, pIcon("rd",16), "Live"));
+  return out;
+}
+function postCard(f, n, anim){
+  const a = BY[f.a], v = VIA[f.via];
+  const tags = (f.tags||[]).filter(t=>t!==f.a && BY[t]).slice(0,3);
+  const fk = a.links.x ? a.id+":x" : null;
+  return h("article",{class:"item"+(anim?" enter":""), style:`--cat:var(${catOf(a.cat).color});--n:${Math.min(n,8)}`},
+    h("div",{class:"meta"}, avatar(a, 28),
+      h("button",{class:"who", data:{acct:a.id}, "aria-haspopup":"dialog"}, a.name),
+      h("span",{class:"kind", style:`--kc:var(${v.col})`}, v.ic ? icon(v.ic,15) : pIcon(v.pic,15), v.label),
+      h("span",null, f.captured || f.via==="Reddit" ? f.src : `via ${f.src}`),
+      h("time",{datetime:f.date, title: f.captured ? "Saved from your browser" : null}, f.noDate ? `seen ${ago(f.date)}${f.timeText ? ", posted "+f.timeText+" ago" : ""}` : ago(f.date))),
+    h("h4",null, ext(f.url, null, f.title)),
+    f.body ? h("p",null,f.body) : null,
+    h("div",{class:"acts"},
+      tags.map(t=>h("button",{class:"tag", data:{acct:t}, "aria-haspopup":"dialog"}, BY[t].name)),
+      h("span",{class:"spacer"}),
+      fk && !followed[fk] ? ext(a.links.x.url, {class:"btn sm", "data-ret":fk}, pIcon("x",15), "Follow") : null,
+      starBtn(a, `star-${f.url}`)));
+}
+function feedsRow(){
+  const ps = Object.keys(PL).filter(p=>handleOf(p) || isVerified(p));
+  if (!ps.length) return h("p",{class:"note"}, "Connect your accounts to open your own X, LinkedIn, Reddit and Instagram feeds from here. ", h("a",{href:"#you", class:"linkish"}, "Connect accounts"));
+  return h("div",{class:"feeds-row", role:"group", "aria-label":"Your feeds"}, h("span",{class:"lbl"},"Your feeds"), ps.flatMap(p=>CONNECT[p].watch.map(([l,u])=>ext(u,{class:"btn sm"}, pIcon(p,16), l))));
+}
+function renderToday(){
+  const anim = freshList("today");
+  const counts = catCounts();
+  const deck = buildDeck();
+  const pos = store.get("briefPos", {});
+  const resumeAt = pos.ed===DATA.fetched && pos.i>0 && pos.i<deck.length ? pos.i : 0;
+  const hero = h("section",{class:"brief-hero", "aria-labelledby":"h-today"},
+    h("p",{class:"date", style:"margin:0"}, h("span",{class:"live","aria-hidden":"true"}), FETCHED.toLocaleDateString(undefined,{weekday:"long", day:"numeric", month:"long"})),
+    h("h2",{id:"h-today", tabindex:"-1", class:"view-title-anchor"}, "Your AI briefing"),
+    h("p",null, `${FEED.length} updates from ${new Set(FEED.map(f=>f.a)).size} accounts${CAPTURED.length ? `, including ${CAPTURED.length} posts saved from X, LinkedIn, Instagram and Reddit as you browsed` : ""}. The briefing walks you through the ${deck.length-1} newest stories, about ten minutes of reading.`),
+    h("div",{class:"cta-row"},
+      h("button",{class:"btn primary", data:{brief:String(resumeAt), k:"brief-start"}}, icon("play",18), resumeAt ? `Resume at story ${resumeAt+1}` : "Start briefing"),
+      resumeAt ? h("button",{class:"btn quiet", data:{brief:"0", k:"brief-restart"}}, "Start over") : null),
+    h("div",{class:"mix"},
+      h("div",{class:"mix-bar"+(anim?" intro":""), role:"img", "aria-label":"Updates by category: "+CATS.map(c=>`${c.short} ${counts[c.id]}`).join(", ")}, CATS.map((c,i)=>h("span",{style:`--cat:var(${c.color});--n:${counts[c.id]};--i:${i}`}))),
+      h("div",{class:"legend","aria-hidden":"true"}, CATS.map(c=>h("span",{style:`--cat:var(${c.color})`}, h("i"), `${c.short} ${counts[c.id]}`)))),
+    feedsRow(),
+    EXT.connected ? null : h("p",{class:"note"}, "Want real posts from X, LinkedIn, Instagram and Reddit here? ", h("a",{href:"#you", class:"linkish", "data-capture":"1"}, "Add the browser extension"), " and they're saved as you browse."));
+  const bar = state.acct ? h("div",{class:"cta-row"}, h("span",{class:"muted"}, "Showing updates about"), h("button",{class:"chip","aria-pressed":"true", data:{clearacct:"1", k:"clearacct"}}, BY[state.acct].name, icon("close",16), h("span",{class:"sr-only"},", remove filter"))) : null;
+  const sections = [];
+  let n = 0;
+  for (const c of (state.cat ? CATS.filter(c=>c.id===state.cat) : CATS)){
+    const accts = ACCTS.filter(a=>a.cat===c.id && (!state.plat || a.links[state.plat]) && (!state.starOnly || starred.includes(a.id)));
+    if (!accts.length) continue;
+    const ids = new Set(accts.map(a=>a.id));
+    const items = FEED.filter(f=>ids.has(f.a) && feedItemOk(f));
+    if (!items.length && (state.acct || state.q || state.via)) continue;
+    const lim = state.open[c.id] ? items.length : 4;
+    const hid = "cat-h-"+c.id;
+    sections.push(h("section",{class:"cat-sec", style:`--cat:var(${c.color})`, "aria-labelledby":hid},
+      h("div",{class:"cat-head"}, h("span",{class:"dot","aria-hidden":"true"}), h("h3",{id:hid}, c.name), h("span",{class:"count"}, `${items.length} update${items.length===1?"":"s"}`), h("div",{class:"live"}, liveLinks(accts))),
+      items.length ? h("div",{class:"list"}, items.slice(0,lim).map(f=>postCard(f, n++, anim)))
+                   : h("p",{class:"empty"}, "No updates in the last few weeks. These accounts post mostly on X; use Live to see their newest posts."),
+      items.length>4 ? h("button",{class:"more", "aria-expanded":String(!!state.open[c.id]), data:{more:c.id, k:"more-"+c.id}}, state.open[c.id] ? "Show fewer" : `Show ${items.length-4} more from ${c.short}`) : null));
+  }
+  if (!sections.length) sections.push(h("p",{class:"empty"}, "Nothing matches these filters. ", h("button",{class:"linkish", data:{clearall:"1", k:"empty-clear"}}, "Clear filters")));
+  put($("#view-today"), hero, bar, ...sections);
+}
+
+/* ---------- Accounts ---------- */
+function platRow(a, p, prefix){
+  const l = a.links[p];
+  if (!l) return h("div",{class:"plat none"}, h("span",null, pIcon(p,18), h("span",{class:"sr-only"}, `No official ${PL[p].name} profile`), h("span",{"aria-hidden":"true"},"Not on "+PL[p].name)));
+  const key = a.id+":"+p, f = !!followed[key];
+  return h("div",{class:"plat"},
+    ext(l.url, {title:`Open ${a.name} on ${PL[p].name}`, "data-ret":key}, pIcon(p,18), h("span",{class:"sr-only"}, PL[p].name+" "), h("span",{class:"h"}, l.h)),
+    h("button",{"aria-pressed":String(f), "aria-label":`Followed on ${PL[p].name}`, data:{follow:key, k:prefix+key}}, icon(f?"check":"plus",18)));
+}
+function renderAccounts(){
+  const anim = freshList("accounts");
+  const list = ACCTS.filter(matches);
+  put($("#view-accounts"), 
+    h("div",null, h("h2",{class:"view-title", id:"h-accounts", tabindex:"-1"}, "Accounts"), h("p",{class:"lede"}, `${list.length} accounts and communities. Open a profile, follow it there, then tick it here.`)),
+    list.length ? h("div",{class:"dir"}, list.map((a,i)=>{
+      const c = catOf(a.cat), n = updatesFor(a.id).length;
+      return h("article",{class:"acct"+(anim?" enter":""), style:`--cat:var(${c.color});--n:${i}`},
+        h("div",{class:"acct-top"}, avatar(a,44),
+          h("div",{class:"t"}, h("button",{class:"name", data:{acct:a.id, k:"d-name-"+a.id}, "aria-haspopup":"dialog"}, a.name), h("span",{class:"role"}, a.role)),
+          starBtn(a,"d-star-"+a.id)),
+        h("div",{class:"row-sb"}, h("span",{class:"cat-pill"}, h("i"), c.short),
+          n ? h("button",{class:"linkish", data:{feedacct:a.id, k:"d-upd-"+a.id}}, `${n} recent update${n>1?"s":""}`) : null),
+        h("div",{class:"plats"}, Object.keys(PL).filter(p=>!(a.sub && p!=="rd")).map(p=>platRow(a,p,"d-"))));
+    })) : h("p",{class:"empty"}, "No accounts match. ", h("button",{class:"linkish", data:{clearall:"1", k:"acc-clear"}}, "Clear filters")));
+}
+
+/* ---------- Follow ---------- */
+function ring(done, total, col, label){
+  const r = 28, C = 2*Math.PI*r, frac = total ? done/total : 0;
+  const s = svg(`<circle class="bg" cx="32" cy="32" r="${r}"/><circle class="fg" cx="32" cy="32" r="${r}" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${(C*(1-frac)).toFixed(1)}"/>`, 64);
+  s.setAttribute("viewBox","0 0 64 64"); s.removeAttribute("stroke");
+  return h("div",{class:"ring", style:`--rc:var(${col})`, role:"img", "aria-label":label}, s, h("b",{"aria-hidden":"true"}, Math.round(frac*100)+"%"));
+}
+let lastSprintKey = null;
+function renderFollow(){
+  const p = state.sprintPlat;
+  const q = ACCTS.filter(a=>a.links[p] && matches(a)).map(a=>({a, l:a.links[p], key:a.id+":"+p}));
+  const order = [...q].sort((x,y)=>state.skipped.indexOf(x.key)-state.skipped.indexOf(y.key));
+  const pending = order.filter(i=>!followed[i.key]);
+  const cur = pending[0];
+  const done = q.length - pending.length;
+  const swap = cur && lastSprintKey && cur.key!==lastSprintKey && !reduceMotion.matches;
+  lastSprintKey = cur?.key || null;
+  put($("#view-follow"), 
+    h("div",null, h("h2",{class:"view-title", id:"h-follow", tabindex:"-1"}, "Follow sprint"), h("p",{class:"lede"}, "One account at a time: open the profile, follow it there, come back and mark it.")),
+    h("div",{class:"seg", role:"group", "aria-label":"Platform"}, Object.keys(PL).map(k=>{ const tot = ACCTS.filter(a=>a.links[k]).length, d = ACCTS.filter(a=>a.links[k] && followed[a.id+":"+k]).length; return h("button",{"aria-pressed":String(k===p), data:{sprint:k, k:"sp-"+k}, style:"display:inline-flex;align-items:center;gap:8px"}, pIcon(k,16), PL[k].name, h("span",{class:"muted", style:"font-size:13px"}, `${d}/${tot}`)); })),
+    h("div",{class:"sprint"},
+      h("div",{class:"sprint-now"},
+        h("div",{style:"display:flex;align-items:center;gap:14px"}, ring(done, q.length, PL[p].col, `${done} of ${q.length} followed on ${PL[p].name}`),
+          h("div",null, h("b",{style:"font-size:18px"}, `${done} of ${q.length} followed`), h("span",{class:"muted", style:"display:block;font-size:14px"},
+            handleOf(p) ? [isVerified(p) ? `Signed in as ${CONNECT[p].display(handleOf(p))}. ` : `${CONNECT[p].display(handleOf(p))} (not verified). `, ext(CONNECT[p].verify(handleOf(p))[0], {class:"linkish"}, CONNECT[p].verify(handleOf(p))[1])]
+                    : [h("a",{href:"#you", class:"linkish", "data-linkp":p}, `Connect your ${PL[p].name} account`), " to check your list."]))),
+        cur ? [
+          h("div",{class:"sprint-who"+(swap?" swap":"")}, avatar(cur.a,60), h("div",null, h("b",null,cur.a.name), h("span",null,cur.a.role), h("span",null,cur.l.h))),
+          h("div",{class:"cta-row"},
+            ext(cur.l.url,{class:"btn primary", "data-k":"sp-open", "data-ret":cur.key}, pIcon(p,18), `Open on ${PL[p].name}`),
+            h("button",{class:"btn", data:{follownext:cur.key, k:"sp-done"}}, icon("check",18), "Mark followed"),
+            h("button",{class:"btn quiet", data:{skip:cur.key, k:"sp-skip"}}, "Skip"))
+        ] : h("div",{class:"sprint-who"}, h("div",{class:"b-done"}, h("div",{class:"big"}, icon("check",40))), h("div",null, h("b",null,`All done on ${PL[p].name}`), h("span",null,`All ${q.length} accounts in this filter are marked followed.`)))),
+      h("div",{style:"display:grid;grid-template-columns:minmax(0,1fr);gap:12px;min-width:0"},
+        h("ul",{class:"queue", "aria-label":`${PL[p].name} accounts`}, q.map(i=>h("li",{class:"qrow"+(followed[i.key]?" done":"")}, avatar(i.a,32), h("span",{class:"name"}, i.a.name), h("span",{class:"h"}, i.l.h),
+          h("button",{class:"check","aria-pressed":String(!!followed[i.key]), "aria-label":`${i.a.name} followed on ${PL[p].name}`, data:{follow:i.key, k:"q-"+i.key}}, icon("check",20))))),
+        p==="rd" ? h("div",{class:"subs"}, SUBS.map(([s,d])=>h("div",{class:"sub"}, ext(`https://www.reddit.com/r/${s}/`,null,"r/"+s), h("span",null,d)))) : null)));
+}
+
+/* ---------- You (progress, linked accounts, appearance) ---------- */
+const strip = (v, re) => v.replace(/^https?:\/\//i,"").replace(/^(www\.|m\.)/i,"").replace(re,"").split(/[/?#]/)[0];
+const ALL_SUBS = `https://www.reddit.com/r/${SUBS.map(s=>s[0]).join("+")}/new/`;
+const CONNECT = {
+  x:{ label:"Your X handle", hint:"Up to 15 letters, numbers or underscores. Paste your profile link or type it, like @karpathy.", err:"Enter an X handle with up to 15 letters, numbers or underscores, like @karpathy.",
+      login:"https://x.com/i/flow/login", re:/^[A-Za-z0-9_]{1,15}$/, norm:v=>strip(v,/^(x|twitter)\.com\//i).replace(/^@/,""), display:h=>"@"+h,
+      verify:h=>[`https://x.com/${h}/following`,"Your Following list"], links:h=>[["Your profile",`https://x.com/${h}`],["Who you follow",`https://x.com/${h}/following`],["Notifications","https://x.com/notifications"]],
+      watch:[["X home","https://x.com/home"],["X notifications","https://x.com/notifications"]] },
+  li:{ label:"Your LinkedIn profile", hint:"The part after linkedin.com/in/ in your profile link, like andrewyng. Pasting the full link works too.", err:"Enter the name from your profile link (after linkedin.com/in/), using letters, numbers or hyphens.",
+      login:"https://www.linkedin.com/login", re:/^[A-Za-z0-9\-_%]{3,100}$/, norm:v=>strip(v.replace(/^\/?in\//i,""),/^linkedin\.com\/in\//i), display:h=>"in/"+h,
+      verify:()=>["https://www.linkedin.com/mynetwork/network-manager/company/","Pages you follow"], links:h=>[["Your profile",`https://www.linkedin.com/in/${h}/`],["Pages you follow","https://www.linkedin.com/mynetwork/network-manager/company/"],["People you follow","https://www.linkedin.com/mynetwork/network-manager/people-follow/following/"]],
+      watch:[["LinkedIn feed","https://www.linkedin.com/feed/"]] },
+  ig:{ label:"Your Instagram username", hint:"Up to 30 letters, numbers, periods or underscores, like @natgeo.", err:"Enter an Instagram username with up to 30 letters, numbers, periods or underscores.",
+      login:"https://www.instagram.com/accounts/login/", re:/^[A-Za-z0-9._]{1,30}$/, norm:v=>strip(v,/^instagram\.com\//i).replace(/^@/,""), display:h=>"@"+h,
+      verify:h=>[`https://www.instagram.com/${h}/following/`,"Who you follow"], links:h=>[["Your profile",`https://www.instagram.com/${h}/`],["Who you follow",`https://www.instagram.com/${h}/following/`]],
+      watch:[["Instagram feed","https://www.instagram.com/"]] },
+  rd:{ label:"Your Reddit username", hint:"3 to 20 letters, numbers, hyphens or underscores, like u/spez.", err:"Enter a Reddit username of 3 to 20 letters, numbers, hyphens or underscores.",
+      login:"https://www.reddit.com/login/", re:/^[A-Za-z0-9_\-]{3,20}$/, norm:v=>strip(v.replace(/^\/?u\//i,""),/^(old\.)?reddit\.com\/(user|u)\//i), display:h=>"u/"+h,
+      verify:()=>["https://www.reddit.com/subreddits/mine/","Your subscriptions"], links:h=>[["Your profile",`https://www.reddit.com/user/${h}/`],["Your subscriptions","https://www.reddit.com/subreddits/mine/"],["All 7 communities",ALL_SUBS]],
+      watch:[["Reddit home","https://www.reddit.com/"],["All 7 communities",ALL_SUBS]] },
+};
+function progressNumbers(){
+  const tot = {x:0,li:0,ig:0,rd:0}, done = {x:0,li:0,ig:0,rd:0};
+  ACCTS.forEach(a=>Object.keys(a.links).forEach(p=>{ tot[p]++; if (followed[a.id+":"+p]) done[p]++; }));
+  const T = Object.values(tot).reduce((s,n)=>s+n,0), D = Object.values(done).reduce((s,n)=>s+n,0);
+  return {tot, done, T, D};
+}
+const AUTH = {server:false, configured:{}, me:{}, busy:null, err:{}, checked:false};
+const verifiedHandle = p => AUTH.me[p]?.username || null;
+const handleOf = p => verifiedHandle(p) || conn[p] || null;
+const isVerified = p => !!AUTH.me[p];
+const AUTH_ERR = {
+  cancelled: n => `You cancelled ${n} sign-in. Try again when you're ready.`,
+  expired: n => `The ${n} sign-in took too long or was opened in another browser. Start it again here.`,
+  state_mismatch: n => `${n} sign-in couldn't be matched to this browser, so it wasn't accepted. Start it again here.`,
+  verify_failed: n => `${n} didn't confirm your account. Try again; if it keeps failing, the app's ${n} settings may need checking.`,
+  provider_error: n => `${n} returned an error. Try again in a moment.`,
+  blocked: n => `Your browser blocked the ${n} sign-in window. Allow pop-ups for this site, or continue in this tab.`,
+};
+function identity(p){
+  const v = AUTH.me[p];
+  const fallback = () => h("div",{class:"av person", style:`--cat:var(${PL[p].col});--s:48px`, "aria-hidden":"true"}, initials(v.name||v.username||"?"));
+  let img = fallback();
+  if (v.avatar){ img = h("img",{src:v.avatar, alt:"", width:"48", height:"48", referrerpolicy:"no-referrer"}); img.addEventListener("error", ()=>img.replaceWith(fallback()), {once:true}); }
+  return h("div",{class:"ident"}, img, h("div",{style:"min-width:0"}, h("b",null, v.name || CONNECT[p].display(v.username)),
+    h("span",null, [v.username ? CONNECT[p].display(v.username) : null, `Verified by ${PL[p].name} on ${new Date(v.verifiedAt).toLocaleString(undefined,{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}`].filter(Boolean).join(". "))));
+}
+function usernameForm(p, editing){
+  const c = CONNECT[p], v = conn[p], id = "conn-in-"+p, back = state.welcome===p;
+  return h("form",{class:"field", novalidate:true, data:{connform:p}},
+    back ? h("p",{class:"welcome", id:id+"-welcome"}, `Welcome back. Enter your ${PL[p].name} username to finish linking.`) : null,
+    h("label",{for:id}, c.label),
+    h("span",{class:"hint", id:id+"-hint"}, c.hint),
+    h("span",{class:"err", id:id+"-err", hidden:true}),
+    h("div",{class:"inrow"},
+      h("input",{id, name:"handle", type:"text", required:true, autocomplete:"off", autocapitalize:"none", spellcheck:"false", enterkeyhint:"done", "aria-describedby":`${back?id+"-welcome ":""}${id}-hint ${id}-err`, "data-k":"ci-"+p, value: editing ? v : null}),
+      h("button",{class:"btn", type:"submit", "data-k":"cs-"+p}, editing ? "Save" : "Save username"),
+      editing ? h("button",{class:"btn quiet", type:"button", data:{conncancel:p, k:"cc-"+p}}, "Cancel") : null));
+}
+function connSection(p){
+  const c = CONNECT[p], n = PL[p].name;
+  const canVerify = AUTH.server && AUTH.configured[p];
+  const busy = AUTH.busy?.p===p, err = AUTH.err[p];
+  let status;
+  if (isVerified(p)) status = h("span",{class:"status verified"}, icon("shield",16), `Verified by ${n}`);
+  else if (conn[p]) status = h("span",{class:"status unverified"}, `Not verified: ${c.display(conn[p])}`);
+  else status = h("span",{class:"status"}, "Not connected");
+  const head = h("div",{class:"conn-head"}, h("span",{class:"pbadge"}, pIcon(p,22)), h("h4",{id:"ch-"+p}, n), status);
+  const sec = (...kids) => h("section",{class:"conn"+(state.welcome===p||AUTH.flash===p?" flash":""), "aria-labelledby":"ch-"+p, id:"conn-"+p, "aria-busy":busy?"true":null}, head, ...kids);
+  const errBox = err ? h("p",{class:"alert", role:"alert"}, icon("alert",18), (AUTH_ERR[err]||AUTH_ERR.provider_error)(n)) : null;
+  const h4 = handleOf(p);
+  const links = h4 || p==="li" ? h("div",{class:"linkrow"}, (h4 ? c.links(h4) : c.links("").slice(1)).map(([l,u])=>ext(u,{class:"btn sm"}, l, icon("ext",15)))) : null;
+
+  // Verified
+  if (isVerified(p)) return sec(identity(p), links,
+    h("div",{class:"cta-row"}, h("button",{class:"linkish", style:"color:var(--bad)", data:{disconnect:p, k:"cd-"+p}}, `Disconnect ${n}`)));
+
+  // Server can verify: one primary action
+  if (canVerify) return sec(errBox,
+    busy ? h("div",{class:"cta-row"},
+      h("button",{class:"btn primary auth-btn", "aria-busy":"true", disabled:true, "data-k":"cauth-"+p}, h("span",{class:"spin","aria-hidden":"true"}), `Waiting for ${n}…`),
+      h("button",{class:"btn quiet", data:{authcancel:p, k:"cx-"+p}}, "Cancel"),
+      AUTH.busy.win ? h("button",{class:"linkish", data:{authfocus:p, k:"cf-"+p}}, "Show sign-in window") : null)
+    : h("button",{class:"btn primary auth-btn", data:{auth:p, k:"cauth-"+p}}, pIcon(p,20), `Continue with ${n}`),
+    h("ol",{class:"steps-mini"},
+      h("li",null, `${n} opens in a small window. Sign in there if you aren't already.`),
+      h("li",null, `Approve "AI Follow Desk". It can only read your public profile.`),
+      h("li",null, `The window closes and your verified ${n} account appears here.`)),
+    p==="ig" ? h("p",{class:"note"}, "Instagram sign-in works with professional (business or creator) accounts. Personal accounts can't sign in to outside apps.") : null,
+    conn[p] ? h("p",{class:"note"}, `You saved ${c.display(conn[p])} earlier without verification. Signing in replaces it with your verified account.`) : null);
+
+  // No verification available here: labelled, unverified fallback
+  const why = AUTH.server ? `${n} sign-in isn't set up on this server yet, so ${n} can't confirm your account.` : `Verified sign-in needs the AI Follow Desk server, and this copy of the app runs without it. Your username is saved in this browser without confirmation from ${n}.`;
+  if (conn[p] && state.connEdit!==p) return sec(h("p",{class:"note"}, why), links,
+    h("div",{class:"cta-row"}, h("button",{class:"linkish", data:{connedit:p, k:"ce-"+p}}, "Change username"), h("button",{class:"linkish", style:"color:var(--bad)", data:{connunlink:p, k:"cu-"+p}}, `Remove ${n} username`)));
+  return sec(h("p",{class:"note"}, why), usernameForm(p, state.connEdit===p));
+}
+
+/* ---------- verified sign-in (server mode) ---------- */
+async function loadAuth(){
+  try {
+    const r = await fetch("/api/me", {credentials:"same-origin", headers:{Accept:"application/json"}, cache:"no-store"});
+    if (!r.ok) throw new Error(r.status);
+    const j = await r.json();
+    if (j.app!=="afd") throw new Error("not afd");
+    AUTH.server = true; AUTH.configured = j.configured || {}; AUTH.me = j.providers || {};
+  } catch { AUTH.server = false; }
+  AUTH.checked = true;
+  let pend = null; try { pend = sessionStorage.getItem("afd:authPending"); sessionStorage.removeItem("afd:authPending"); } catch {}
+  if (pend && AUTH.me[pend]) onAuthDone({provider:pend, ok:true, profile:AUTH.me[pend]}, true);
+  else renderAll();
+}
+function startAuth(p){
+  AUTH.err[p] = null;
+  const w = 520, ht = 720, left = Math.max(0, Math.round(screenX + (outerWidth - w)/2)), top = Math.max(0, Math.round(screenY + (outerHeight - ht)/2));
+  let win = null;
+  try { win = window.open(`/auth/${p}/start?mode=popup`, "afd-auth", `popup=yes,width=${w},height=${ht},left=${left},top=${top}`); } catch {}
+  if (!win){ // pop-ups blocked: continue in this tab and come back to #you
+    try { sessionStorage.setItem("afd:authPending", p); } catch {}
+    location.assign(`/auth/${p}/start?mode=redirect`); return;
+  }
+  AUTH.busy = {p, win, at:Date.now()};
+  render(); $(`[data-k="cx-${p}"]`)?.focus();
+  announce(`${PL[p].name} sign-in opened in a new window`);
+}
+function onAuthDone(d, fromReload){
+  const p = d.provider; if (!PL[p]) return;
+  if (AUTH.busy?.p===p) AUTH.busy = null;
+  if (d.ok && d.profile){
+    AUTH.me[p] = d.profile; AUTH.err[p] = null; AUTH.flash = p;
+    if (d.profile.username){ conn[p] = d.profile.username; store.set("conn", conn); }
+    if (state.view!=="you" && !fromReload) location.hash = "you";
+    render(); if (fromReload) renderAll();
+    const t = document.getElementById("ch-"+p); t?.setAttribute("tabindex","-1"); t?.focus({preventScroll:true}); t?.closest("section")?.scrollIntoView({block:"center", behavior: reduceMotion.matches ? "auto" : "smooth"});
+    toast(`Signed in. ${PL[p].name} verified you as ${d.profile.username ? CONNECT[p].display(d.profile.username) : d.profile.name}.`);
+    setTimeout(()=>{ AUTH.flash = null; }, 1300);
+  } else {
+    AUTH.err[p] = d.error || "provider_error"; render();
+    $(`[data-k="cauth-${p}"]`)?.focus();
+  }
+}
+// Results arrive from the sign-in window: postMessage (same origin only) or BroadcastChannel if the window lost its opener
+addEventListener("message", e=>{ if (e.origin===location.origin && e.data?.type==="afd-auth") onAuthDone(e.data); });
+try { new BroadcastChannel("afd-auth").onmessage = e=>{ if (e.data?.type==="afd-auth") onAuthDone(e.data); }; } catch {}
+// Coming back to this tab while waiting: re-check with the server in case the message was missed
+addEventListener("focus", async ()=>{
+  if (!AUTH.busy || Date.now()-AUTH.busy.at < 1500) return;
+  const p = AUTH.busy.p;
+  try { const j = await (await fetch("/api/me",{credentials:"same-origin", cache:"no-store"})).json(); if (j.providers?.[p] && AUTH.busy?.p===p) onAuthDone({provider:p, ok:true, profile:j.providers[p]}); } catch {}
+});
+async function disconnect(p){
+  const n = PL[p].name;
+  try {
+    const r = await fetch(`/auth/${p}/disconnect`, {method:"POST", credentials:"same-origin", headers:{"Content-Type":"application/json"}, body:"{}"});
+    if (!r.ok) throw new Error(r.status);
+    delete AUTH.me[p]; delete conn[p]; store.set("conn", conn);
+    render(); $(`[data-k="cauth-${p}"]`)?.focus();
+    toast(`${n} disconnected. Sign in again any time.`);
+  } catch { toast(`Couldn't disconnect ${n}. Check your connection and try again.`); }
+}
+
+function themeSeg(group){
+  const pref = store.get("theme","system");
+  return [["system","Match system","monitor"],["light","Light","sun"],["dark","Dark","moon"]].map(([v,l,ic])=>h("label",null, h("input",{type:"radio", name:"theme-"+group, value:v, checked: pref===v ? true : null, "data-theme-input":"1"}), icon(ic,17), l));
+}
+function renderYou(){
+  const {tot, done, T, D} = progressNumbers();
+  put($("#view-you"), 
+    h("div",null, h("h2",{class:"view-title", id:"h-you", tabindex:"-1"}, "You"), h("p",{class:"lede"}, AUTH.server ? "Your follow progress, connected accounts and settings. Sign-ins are verified by each platform and kept in an encrypted cookie in this browser." : "Your follow progress, linked accounts and settings. Everything here is saved in this browser only, and this app never sees your passwords.")),
+    h("section",{class:"panel", "aria-labelledby":"you-prog"}, h("h3",{id:"you-prog"}, "Follow progress"),
+      h("div",{class:"prog"}, ring(D, T, "--primary", `${D} of ${T} profile links followed`),
+        h("div",{class:"bars"}, Object.keys(PL).map(p=>h("div",{class:"bar"}, h("div",{class:"t"}, h("span",{style:"display:inline-flex;gap:6px;align-items:center"}, pIcon(p,16), PL[p].name), h("span",null, `${done[p]} of ${tot[p]}`)), h("div",{class:"meter", role:"img", "aria-label":`${done[p]} of ${tot[p]} on ${PL[p].name}`}, h("span",{style:`--pc:var(${PL[p].col});--v:${tot[p]?done[p]/tot[p]:0}`})))))),
+      h("p",{class:"note"}, `${starred.length} of 5 accounts starred for notifications.`)),
+    h("section",{class:"panel", "aria-labelledby":"you-linked"}, h("h3",{id:"you-linked"}, AUTH.server ? "Connected accounts" : "Linked accounts"),
+      h("p",{class:"note"}, AUTH.server ? "Sign in with each platform to confirm it's you. AI Follow Desk only reads your public profile and never sees your password." : "Save your username for each platform. Verified sign-in needs the AI Follow Desk server; this copy shows usernames as not verified."),
+      h("div",{class:"conns"}, Object.keys(PL).map(connSection))),
+    capturePanel(),
+    h("section",{class:"panel", "aria-labelledby":"you-theme"}, h("h3",{id:"you-theme"}, "Appearance"),
+      h("fieldset",{style:"border:0;margin:0;padding:0"}, h("legend",{class:"sr-only"}, "Theme"), h("div",{class:"theme-seg"}, themeSeg("you")))),
+    h("p",{class:"note"}, "Accounts come from The Follow List by AI with Divyam (links checked 12 Nov 2026). Updates come from 17 official blogs and newsletters, 7 subreddits plus u/Cohere, and a Google News search per account. X, LinkedIn and Instagram block automated reading, so their posts open through Live and the profile links."));
+}
+
+/* ---------- posts from your browser (AI Follow Desk Capture extension) ---------- */
+function fromCapture(c){
+  if (!c || !BY[c.a] || !PL[c.p]) return null;
+  const u = safeUrl(c.url); if (!u) return null;
+  const text = String(c.text||"").trim(), first = text.split("\n")[0].trim();
+  const title = first ? (first.length>180 ? first.slice(0,177)+"…" : first) : `${BY[c.a].name} posted on ${PL[c.p].name}`;
+  const date = c.date && !isNaN(new Date(c.date)) ? c.date : c.capturedAt;
+  return {a:c.a, via:{x:"X", li:"LinkedIn", ig:"Instagram", rd:"Reddit"}[c.p], title, body:text.slice(first.length).trim().slice(0,320), url:u,
+    src: `${String(c.author||PL[c.p].name).slice(0,80)} on ${PL[c.p].name}`, date, noDate:!c.date, timeText: c.timeText ? String(c.timeText).slice(0,30) : null, captured:true, p:c.p};
+}
+addEventListener("message", e=>{
+  if (e.source!==window || e.data?.type!=="afd-ext-items" || !Array.isArray(e.data.items)) return;
+  EXT.connected = true; EXT.last = e.data.lastCapture || null;
+  CAPTURED = e.data.items.slice(0,1500).map(fromCapture).filter(Boolean);
+  const seen = new Set(CAPTURED.map(f=>f.url));
+  FEED = [...CAPTURED, ...BASE_FEED.filter(f=>!seen.has(f.url))].sort((a,b)=>b.date.localeCompare(a.date));
+  renderAll();
+});
+const askExt = () => window.postMessage({type:"afd-ext-request"}, location.origin==="null" ? "*" : location.origin);
+addEventListener("focus", askExt);
+document.addEventListener("visibilitychange", ()=>{ if (!document.hidden) askExt(); });
+function collectLinks(){
+  const out = [];
+  for (const c of CATS){ const accts = ACCTS.filter(a=>a.cat===c.id && a.links.x); if (accts.length) out.push(ext(`https://x.com/search?q=${encodeURIComponent(accts.map(a=>"from:"+a.links.x.h.slice(1)).join(" OR "))}&f=live`, {class:"btn sm"}, pIcon("x",15), c.short)); }
+  out.push(ext("https://www.linkedin.com/feed/", {class:"btn sm"}, pIcon("li",15), "LinkedIn feed"));
+  out.push(ext("https://www.instagram.com/", {class:"btn sm"}, pIcon("ig",15), "Instagram feed"));
+  out.push(ext(ALL_SUBS, {class:"btn sm"}, pIcon("rd",15), "All 7 subreddits"));
+  return out;
+}
+function capturePanel(){
+  const counts = Object.fromEntries(Object.keys(PL).map(p=>[p, CAPTURED.filter(f=>f.p===p).length]));
+  const copyBtn = h("button",{class:"btn sm", data:{copyorigin:"1", k:"copy-origin"}}, "Copy address");
+  return h("section",{class:"panel", "aria-labelledby":"you-capture", id:"capture"}, h("h3",{id:"you-capture"}, "Posts from your browser"),
+    EXT.connected ? [
+      h("div",{class:"conn-head"}, h("span",{class:"status verified"}, icon("check",16), "Extension connected"),
+        h("span",{class:"muted", style:"font-size:14px"}, EXT.last ? `Last post saved ${ago(EXT.last)}` : "No posts saved yet")),
+      h("div",{class:"bars"}, Object.keys(PL).map(p=>h("div",{class:"bar"}, h("div",{class:"t"}, h("span",{style:"display:inline-flex;gap:6px;align-items:center"}, pIcon(p,16), PL[p].name), h("span",null, `${counts[p]} posts`))))),
+      h("p",{class:"note"}, "Open any of these pages and browse as usual. Posts from accounts on your list are saved automatically and appear in Today."),
+      h("div",{class:"linkrow"}, collectLinks()),
+      h("p",{class:"note"}, "Company and people pages work too: open an account from Accounts. The extension reads only what's on your screen, and stores it only in this browser.")
+    ] : [
+      h("p",{class:"note"}, "The AI Follow Desk Capture extension saves posts from your list while you browse X, LinkedIn, Instagram and Reddit in this browser. It doesn't use their APIs and doesn't browse on its own: it reads only the pages you open."),
+      h("ol",{class:"steps-mini", style:"color:var(--fg);font-size:15px;gap:8px"},
+        h("li",null, "Open ", h("b",null,"chrome://extensions"), " (or ", h("b",null,"edge://extensions"), ") and switch on Developer mode."),
+        h("li",null, "Choose ", h("b",null,"Load unpacked"), " and select the ", h("b",null,"extension"), " folder from AI Follow Desk."),
+        h("li",null, location.hostname==="localhost"||location.protocol==="file:" ? "That's it for this copy: it connects automatically. Reload this page." : ["Open the extension's ", h("b",null,"Connect app"), " page and add this address: ", h("code",{style:"overflow-wrap:anywhere"}, location.origin), " ", copyBtn]),
+        h("li",null, "Visit X, LinkedIn, Instagram or Reddit. New posts from your list show up here within seconds.")),
+      h("p",{class:"note"}, "Inside the claude.ai preview the extension may not be able to reach this page. Use the self-hosted app or a local copy for browser capture.")
+    ]);
+}
+
+/* ---------- right rail (desktop) ---------- */
+function renderRail(){
+  if (!matchMedia("(min-width:1280px)").matches){ put($("#railHost"), ); return; }
+  const {T, D} = progressNumbers();
+  put($("#railHost"), 
+    h("section",{class:"rcard", "aria-labelledby":"r-prog"}, h("h2",{id:"r-prog"}, "Follow progress"),
+      h("div",{style:"display:flex;gap:12px;align-items:center"}, ring(D, T, "--primary", `${D} of ${T} followed`), h("div",null, h("b",null, `${D} of ${T}`), h("span",{class:"muted", style:"display:block;font-size:14px"}, "profile links followed"))),
+      h("a",{href:"#follow", class:"btn sm"}, "Continue follow sprint")),
+    h("section",{class:"rcard", "aria-labelledby":"r-linked"}, h("h2",{id:"r-linked"}, "Your accounts"),
+      h("div",{class:"lp"}, Object.keys(PL).map(p=>h("a",{href:"#you", class:isVerified(p)?"on":"", "data-linkp":p, title: isVerified(p) ? `Verified by ${PL[p].name}` : conn[p] ? "Not verified" : null}, pIcon(p,16), isVerified(p) ? [AUTH.me[p].username ? CONNECT[p].display(AUTH.me[p].username) : AUTH.me[p].name, icon("shield",14)] : conn[p] ? `${CONNECT[p].display(conn[p])} (not verified)` : `Connect ${PL[p].name}`)))),
+    h("section",{class:"rcard", "aria-labelledby":"r-star"}, h("h2",{id:"r-star"}, `Starred (${starred.length} of 5)`),
+      starred.length ? starred.map(id=>h("div",{class:"mini-acct"}, avatar(BY[id],28), h("button",{data:{acct:id}, "aria-haspopup":"dialog"}, BY[id].name)))
+                     : h("p",{class:"note"}, "Star up to five accounts you want notifications from.")));
+}
+
+/* ---------- account sheet ---------- */
+let dlgAcct = null;
+function renderDialog(){
+  const a = BY[dlgAcct]; if (!a) return;
+  const k = document.activeElement?.dataset?.k;
+  const ups = updatesFor(a.id).slice(0,5);
+  put($("#acctDlg"), h("div",{class:"grab","aria-hidden":"true"}),
+    h("div",{class:"dlg-head"}, avatar(a,48),
+      h("div",{style:"flex:1;min-width:0"}, h("h3",{id:"dlgTitle"}, a.name), h("span",{class:"muted", style:"font-size:14.5px"}, `${a.role}, in ${catOf(a.cat).name}`)),
+      starBtn(a,"m-star"),
+      h("button",{class:"icon-btn", data:{dlgclose:"acctDlg", k:"m-close"}, "aria-label":"Close", autofocus:true}, icon("close",22))),
+    h("div",{class:"dlg-body"},
+      h("h4",null,"Profiles"),
+      h("div",{class:"plats"}, Object.keys(PL).filter(p=>!(a.sub && p!=="rd")).map(p=>platRow(a,p,"m-"))),
+      h("h4",null, ups.length ? "Recent updates" : "No updates in the last few weeks"),
+      ups.length ? h("div",{class:"mini"}, ups.map(f=>ext(f.url,null, h("b",null,f.title), h("span",null, `${VIA[f.via].label} from ${f.src}, ${ago(f.date)}`)))) : null,
+      ups.length ? h("button",{class:"btn primary", data:{feedacct:a.id, k:"m-feed"}}, "Show all in Today") : null));
+  if (k){ const el = $("#acctDlg").querySelector(`[data-k="${CSS.escape(k)}"]`); el?.focus(); }
+}
+function openDialog(id){ dlgAcct = id; renderDialog(); const d = $("#acctDlg"); if (!d.open) d.showModal(); }
+$("#acctDlg").addEventListener("close", ()=>{ dlgAcct = null; });
+document.querySelectorAll("dialog").forEach(d=>d.addEventListener("click", e=>{ if (e.target===d && d.id!=="brief" && !("closedBy" in HTMLDialogElement.prototype)) d.close(); }));
+
+/* ---------- briefing reader ---------- */
+function buildDeck(){
+  const picks = [];
+  for (const c of CATS){
+    const seen = new Set();
+    const items = FEED.filter(f=>BY[f.a].cat===c.id).filter(f=>{ if (seen.has(f.a)) return false; seen.add(f.a); return true; }).slice(0,3);
+    picks.push(...items);
+  }
+  return [...picks, {done:true}];
+}
+let deck = [], briefIdx = 0, briefObs = null;
+function briefCard(f, i){
+  if (f.done) return h("article",{class:"b-card", "data-i":i, "aria-roledescription":"slide", "aria-label":`${i+1} of ${deck.length}`},
+    h("div",{class:"b-in b-done"}, h("div",{class:"big"}, icon("check",44)), h("h3",null,"You're caught up"),
+      h("p",null, `That's the ${deck.length-1} newest stories across all six categories. Browse the full feed for more, or follow the accounts you liked.`),
+      h("div",{class:"b-acts", style:"justify-content:center"}, h("button",{class:"btn primary", data:{briefclose:"today", k:"b-feed"}}, "Back to Today"), h("button",{class:"btn", data:{briefclose:"follow", k:"b-follow"}}, "Start follow sprint"))));
+  const a = BY[f.a], c = catOf(a.cat), v = VIA[f.via], fk = a.links.x ? a.id+":x" : null;
+  return h("article",{class:"b-card", "data-i":i, "aria-roledescription":"slide", "aria-label":`${i+1} of ${deck.length}`, style:`--cat:var(${c.color})`},
+    h("div",{class:"b-in"},
+      h("span",{class:"b-cat"}, h("i"), c.name),
+      h("h3",null, f.title),
+      f.body ? h("p",null, f.body) : null,
+      h("div",{class:"b-who"}, avatar(a,32), h("b",null,a.name), h("span",null, `${v.label}, ${f.via==="Reddit" ? f.src : "via "+f.src}, ${ago(f.date)}`)),
+      h("div",{class:"b-acts"},
+        ext(f.url,{class:"btn primary"}, "Read the story", icon("ext",16)),
+        fk ? (followed[fk] ? h("span",{class:"btn quiet", style:"color:var(--ok)"}, icon("check",18), `Following ${a.links.x.h}`) : ext(a.links.x.url,{class:"btn", "data-ret":fk}, pIcon("x",16), `Follow ${a.links.x.h}`)) : null,
+        starBtn(a,"b-star-"+i))));
+}
+function openBrief(start){
+  deck = buildDeck();
+  const d = $("#brief");
+  put(d, 
+    h("div",{class:"b-top"},
+      h("div",{class:"b-prog","aria-hidden":"true"}, deck.map(()=>h("span"))),
+      h("div",{class:"b-bar"}, h("span",{class:"pos", id:"bPos", "aria-live":"polite"}), h("button",{class:"icon-btn", data:{briefclose:"", k:"b-close"}, "aria-label":"Close briefing"}, icon("close",24)))),
+    h("div",{class:"b-track", id:"bTrack", tabindex:"0", "aria-label":"Stories. Use the arrow keys or swipe."}, deck.map(briefCard)),
+    h("div",{class:"b-foot"},
+      h("button",{class:"btn", data:{bstep:"-1", k:"b-prev"}}, icon("left",18), "Previous"),
+      h("button",{class:"btn primary", data:{bstep:"1", k:"b-next"}}, "Next", icon("right",18))));
+  d.showModal();
+  const track = $("#bTrack");
+  briefObs?.disconnect();
+  briefObs = new IntersectionObserver(es=>{ es.forEach(e=>{ if (e.isIntersecting && e.intersectionRatio>.6) setBriefIdx(+e.target.dataset.i, false); }); }, {root:track, threshold:[.6]});
+  track.querySelectorAll(".b-card").forEach(c=>briefObs.observe(c));
+  goBrief(start, true);
+  $('[data-k="b-next"]').focus();
+}
+function setBriefIdx(i, scroll){
+  briefIdx = Math.max(0, Math.min(deck.length-1, i));
+  const d = $("#brief"); if (!d.open) return;
+  d.querySelectorAll(".b-prog span").forEach((s,j)=>s.classList.toggle("done", j<=briefIdx));
+  d.querySelectorAll(".b-card").forEach((c,j)=>{ c.classList.toggle("active", j===briefIdx); c.inert = j!==briefIdx; });
+  $("#bPos").textContent = deck[briefIdx].done ? "Done" : `Story ${briefIdx+1} of ${deck.length-1}`;
+  $('[data-k="b-prev"]').disabled = briefIdx===0;
+  $('[data-k="b-next"]').hidden = !!deck[briefIdx].done;
+  store.set("briefPos", {ed:DATA.fetched, i: deck[briefIdx].done ? 0 : briefIdx});
+  if (scroll){ const c = d.querySelectorAll(".b-card")[briefIdx]; $("#bTrack").scrollTo({left:c.offsetLeft, behavior: reduceMotion.matches ? "auto" : "smooth"}); }
+}
+const goBrief = (i, instant) => { if (instant){ const tr = $("#bTrack"); const prev = tr.style.scrollBehavior; tr.style.scrollBehavior = "auto"; setBriefIdx(i, true); tr.style.scrollBehavior = prev; } else setBriefIdx(i, true); };
+$("#brief").addEventListener("keydown", e=>{
+  if (e.target.closest("input")) return;
+  if (e.key==="ArrowRight"){ e.preventDefault(); goBrief(briefIdx+1); }
+  if (e.key==="ArrowLeft"){ e.preventDefault(); goBrief(briefIdx-1); }
+});
+$("#brief").addEventListener("close", ()=>{ briefObs?.disconnect(); renderAll(); });
+
+/* ---------- rendering + routing ---------- */
+function render(){
+  const k = document.activeElement?.dataset?.k;
+  renderNav(); renderFilters();
+  VIEW_IDS.forEach(v=>{ $("#view-"+v).hidden = v!==state.view; });
+  ({today:renderToday, accounts:renderAccounts, follow:renderFollow, you:renderYou})[state.view]();
+  renderRail();
+  if (k){ const el = document.querySelector(`[data-k="${CSS.escape(k)}"]`); if (el && el!==document.activeElement && !el.closest("[hidden]")) el.focus({preventScroll:true}); }
+}
+const renderAll = () => { render(); if (dlgAcct) renderDialog(); };
+let renderCtl = null;
+function scheduleRender(){
+  renderCtl?.abort();
+  if (globalThis.TaskController && globalThis.scheduler?.postTask){ renderCtl = new TaskController({priority:"user-visible"}); scheduler.postTask(render, {signal:renderCtl.signal}).catch(()=>{}); }
+  else { const t = setTimeout(render, 0); renderCtl = {abort:()=>clearTimeout(t)}; }
+}
+function setView(v, {focus=true}={}){
+  if (!VIEW_IDS.includes(v)) v = "today";
+  if (v===state.view && $("#view-"+v).childElementCount) return;
+  const dir = VIEW_IDS.indexOf(v) >= VIEW_IDS.indexOf(state.view) ? 1 : -1;
+  const go = ()=>{
+    state.view = v; render(); window.scrollTo({top:0});
+    const p = state.pendingFocusConn; state.pendingFocusConn = null;
+    if (v==="you" && state.pendingCapture){ state.pendingCapture = false; const c = document.getElementById("you-capture"); c?.setAttribute("tabindex","-1"); c?.focus({preventScroll:true}); c?.scrollIntoView({block:"start"}); return; }
+    const target = v==="you" && p && ($(`[data-k="cauth-${p}"]`) || $(`[data-k="ci-${p}"]`) || $(`[data-k="ce-${p}"]`) || $(`[data-k="cd-${p}"]`));
+    if (target){ target.focus({preventScroll:true}); target.closest("section")?.scrollIntoView({block:"center"}); }
+    else if (focus) document.getElementById("h-"+v)?.focus({preventScroll:true});
+  };
+  if (document.startViewTransition && !reduceMotion.matches && state.view!==v){
+    document.documentElement.style.setProperty("--dir", dir);
+    VIEW_IDS.forEach(x=>$("#view-"+x).style.viewTransitionName = "");
+    $("main").style.viewTransitionName = "view";
+    document.startViewTransition(go);
+  } else go();
+}
+// Views are real links (#today, #accounts, #follow, #you): back/forward and deep links work
+addEventListener("hashchange", ()=>{ const v = location.hash.slice(1) || "today"; if (VIEW_IDS.includes(v)) setView(v); });
+
+/* ---------- events ---------- */
+document.addEventListener("click", e=>{
+  const a = e.target.closest?.("a[data-linkp]");
+  if (a){ state.pendingFocusConn = a.dataset.linkp; }
+  if (e.target.closest?.("a[data-capture]")) state.pendingCapture = true;
+  const t = e.target.closest("button"); if (!t) return;
+  const d = t.dataset;
+  if (d.cat!==undefined){ state.cat = d.cat; render(); return announce(d.cat ? `Showing ${catOf(d.cat).name}` : "Showing all categories"); }
+  if (d.via!==undefined){ state.via = d.via; return render(); }
+  if (d.staronly){ state.starOnly = !state.starOnly; return render(); }
+  if (d.clearall){ Object.assign(state, {cat:"", via:"", plat:"", starOnly:false, acct:"", q:""}); $("#q").value = ""; render(); return announce("Filters cleared"); }
+  if (d.clearacct){ state.acct = ""; render(); return announce("Showing all accounts"); }
+  if (d.more){ state.open[d.more] = !state.open[d.more]; return render(); }
+  if (d.acct) return openDialog(d.acct);
+  if (d.dlgclose) return $("#"+d.dlgclose).close();
+  if (t.id==="filterBtn") return openFilters();
+  if (d.feedacct){
+    state.acct = d.feedacct; state.via = ""; state.cat = "";
+    document.querySelectorAll("dialog[open]").forEach(x=>x.close());
+    if (location.hash!=="#today") location.hash = "today"; else render();
+    return announce(`Today filtered to ${BY[d.feedacct].name}`);
+  }
+  if (d.follow){ const k = d.follow; return setFollowed(k, !followed[k]); }
+  if (d.follownext){ setFollowed(d.follownext, true); $('[data-k="sp-open"]')?.focus(); return; }
+  if (d.skip){ state.skipped = state.skipped.filter(x=>x!==d.skip).concat(d.skip); render(); $('[data-k="sp-open"]')?.focus(); return; }
+  if (d.sprint){ state.sprintPlat = d.sprint; lastSprintKey = null; return render(); }
+  if (d.star) return toggleStar(d.star, t);
+  if (d.brief!==undefined) return openBrief(+d.brief);
+  if (d.bstep) return goBrief(briefIdx + (+d.bstep));
+  if (d.briefclose!==undefined){ $("#brief").close(); if (d.briefclose && location.hash!=="#"+d.briefclose) location.hash = d.briefclose; return; }
+  if (d.auth) return startAuth(d.auth);
+  if (d.authcancel){ const p = d.authcancel; try { AUTH.busy?.win?.close(); } catch {} AUTH.busy = null; render(); $(`[data-k="cauth-${p}"]`)?.focus(); return announce(`${PL[p].name} sign-in cancelled`); }
+  if (d.authfocus){ try { AUTH.busy?.win?.focus(); } catch {} return; }
+  if (d.disconnect) return disconnect(d.disconnect);
+  if (d.copyorigin){ navigator.clipboard?.writeText(location.origin).then(()=>toast("Address copied"), ()=>toast(`Copy this address: ${location.origin}`)); return; }
+  if (d.connedit){ state.connEdit = d.connedit; render(); $(`[data-k="ci-${d.connedit}"]`)?.focus(); return; }
+  if (d.conncancel){ state.connEdit = null; render(); $(`[data-k="ce-${d.conncancel}"]`)?.focus(); return; }
+  if (d.connunlink){
+    const p = d.connunlink, old = conn[p]; delete conn[p]; store.set("conn", conn); render(); $(`[data-k="ci-${p}"]`)?.focus();
+    return toast(`${PL[p].name} unlinked`, ()=>{ conn[p] = old; store.set("conn", conn); render(); });
+  }
+});
+document.addEventListener("change", e=>{
+  if (e.target.dataset?.platsel){ state.plat = e.target.value; render(); }
+  if (e.target.dataset?.themeInput){ store.set("theme", e.target.value); applyTheme(e.target.value); }
+});
+$("#q").addEventListener("input", e=>{ state.q = e.target.value.trim(); scheduleRender(); });
+document.addEventListener("keydown", e=>{
+  if (e.key==="/" && !e.target.closest("input,textarea,select,[contenteditable]") && !document.querySelector("dialog[open]")){ e.preventDefault(); $("#q").focus(); }
+});
+wide.addEventListener("change", ()=>{ if ($("#filterDlg").open) $("#filterDlg").close(); render(); });
+matchMedia("(min-width:1280px)").addEventListener("change", renderRail);
+
+/* linking forms */
+function validateHandle(form, show){
+  const p = form.dataset.connform, c = CONNECT[p], inp = form.elements.handle, err = form.querySelector(".err");
+  const v = c.norm(inp.value.trim()), ok = c.re.test(v);
+  inp.setCustomValidity(ok ? "" : c.err);
+  if (show || inp.getAttribute("aria-invalid")==="true"){ inp.setAttribute("aria-invalid", String(!ok)); err.hidden = ok; put(err, ...(ok ? [] : [icon("alert",16), c.err])); }
+  return ok ? v : null;
+}
+document.addEventListener("submit", e=>{
+  const f = e.target.closest("form[data-connform]"); if (!f) return;
+  e.preventDefault();
+  const p = f.dataset.connform, v = validateHandle(f, true);
+  if (!v){ f.elements.handle.focus(); return; }
+  conn[p] = v; store.set("conn", conn); state.connEdit = null; state.welcome = null;
+  render(); $(`[data-k="ce-${p}"]`)?.focus();
+  toast(`${PL[p].name} username saved as ${CONNECT[p].display(v)}. Not verified by ${PL[p].name}.`);
+});
+document.addEventListener("input", e=>{ const f = e.target.closest?.("form[data-connform]"); if (f) validateHandle(f, false); });
+
+/* ---------- leaving and coming back ---------- */
+let pending = null;
+document.addEventListener("click", e=>{
+  const a = e.target.closest?.("a[href]"); if (!a) return;
+  if (a.dataset.signin){
+    const p = a.dataset.signin, w = 520, ht = 700;
+    const left = Math.max(0, Math.round((screen.availWidth - w)/2)), top = Math.max(0, Math.round((screen.availHeight - ht)/2));
+    let win = null;
+    try { win = window.open(a.href, "afd-signin", `popup=yes,width=${w},height=${ht},left=${left},top=${top}`); } catch {}
+    if (win){ e.preventDefault(); try { win.opener = null; } catch {} toast(`${PL[p].name} sign-in opened in a small window. Close it when you're done.`); }
+    pending = {kind:"signin", p, at:Date.now()};
+  } else if (a.dataset.ret && !followed[a.dataset.ret]){
+    pending = {kind:"follow", key:a.dataset.ret, at:Date.now()};
+  }
+}, true);
+function onReturn(){
+  if (!pending || Date.now() - pending.at < 1200) return;
+  const pnd = pending; pending = null;
+  if (pnd.kind==="signin"){
+    if (conn[pnd.p]) return;
+    state.welcome = pnd.p;
+    const focusIt = ()=>{ const t = $(`[data-k="ci-${pnd.p}"]`); t?.focus({preventScroll:true}); t?.closest("section")?.scrollIntoView({block:"center", behavior: reduceMotion.matches ? "auto" : "smooth"}); };
+    if (state.view!=="you"){ location.hash = "you"; setTimeout(focusIt, 380); } else { render(); focusIt(); }
+    announce(`Welcome back. Enter your ${PL[pnd.p].name} username to finish linking.`);
+  } else if (!followed[pnd.key]) showResume(pnd.key);
+}
+document.addEventListener("visibilitychange", ()=>{ if (document.visibilityState==="visible") onReturn(); });
+addEventListener("focus", onReturn);
+document.addEventListener("pointerdown", e=>{ if (!e.target.closest?.("#resume")) onReturn(); }, true);
+let resumeKey = null;
+function showResume(key){
+  const [id,p] = key.split(":"); resumeKey = key;
+  $("#resumeMsg").textContent = `Back from ${PL[p].name}. Did you follow ${BY[id].name}?`;
+  const r = $("#resume"); if (!r.matches(":popover-open")) r.showPopover();
+  $("#resumeYes").focus();
+}
+function closeResume(mark){
+  const key = resumeKey; resumeKey = null; $("#resume").hidePopover(); if (!key) return;
+  if (mark) setFollowed(key, true);
+  const scope = document.querySelector("dialog[open]") || $("#view-"+state.view);
+  const back = (state.view==="follow" && !document.querySelector("dialog[open]") && $('[data-k="sp-open"]')) || scope.querySelector(`[data-follow="${CSS.escape(key)}"]`) || scope.querySelector(`[data-ret="${CSS.escape(key)}"]`) || scope.querySelector("button,a");
+  back?.focus();
+}
+$("#resumeYes").addEventListener("click", ()=>closeResume(true));
+$("#resumeNo").addEventListener("click", ()=>closeResume(false));
+$("#resume").addEventListener("keydown", e=>{ if (e.key==="Escape"){ e.preventDefault(); closeResume(false); } });
+
+/* ---------- theme ---------- */
+const hostTheme = document.documentElement.getAttribute("data-theme");
+function applyTheme(pref){
+  const v = pref==="light"||pref==="dark" ? pref : "system", root = document.documentElement;
+  if (v!=="system") root.setAttribute("data-theme", v); else if (hostTheme) root.setAttribute("data-theme", hostTheme); else root.removeAttribute("data-theme");
+  document.querySelectorAll('[data-theme-input]').forEach(i=>{ i.checked = i.value===v; });
+  const dark = v==="dark" || (v==="system" && matchMedia("(prefers-color-scheme: dark)").matches);
+  put($("#themeBtn"), icon(v==="system" ? "monitor" : dark ? "moon" : "sun", 22));
+  $("#themeBtn").setAttribute("aria-label", `Theme: ${({system:"match system",light:"light",dark:"dark"})[v]}`);
+}
+addEventListener("storage", e=>{
+  if (e.key==="afd:theme") applyTheme(store.get("theme","system"));
+  if (e.key==="afd:followed"){ followed = store.get("followed",{}); renderAll(); }
+  if (e.key==="afd:starred"){ starred = store.get("starred",[]); renderAll(); }
+  if (e.key==="afd:conn"){ conn = store.get("conn",{}); renderAll(); }
+});
+
+/* ---------- boot ---------- */
+$("#searchIcon").replaceWith(icon("search",20));
+put(document.querySelector('[data-themegroup="menu"]'), ...themeSeg("menu"));
+applyTheme(store.get("theme","system"));
+state.view = VIEW_IDS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "today";
+render();
+loadAuth();
+askExt();
+</script>

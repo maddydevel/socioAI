@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "AI Follow Desk Capture",
+  "version": "1.0.0",
+  "description": "Saves posts from your AI Follow Desk accounts while you browse X, LinkedIn, Instagram and Reddit, and shows them in AI Follow Desk. Everything stays in your browser.",
+  "permissions": ["storage", "scripting"],
+  "optional_host_permissions": ["https://*/*", "http://*/*"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_popup": "popup.html", "default_title": "AI Follow Desk Capture" },
+  "options_page": "options.html",
+  "content_scripts": [
+    {
+      "matches": ["https://x.com/*", "https://twitter.com/*", "https://www.linkedin.com/*", "https://www.instagram.com/*", "https://www.reddit.com/*", "https://old.reddit.com/*"],
+      "js": ["capture.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["http://localhost/*", "http://127.0.0.1/*", "file:///*/ai-follow-desk/*"],
+      "js": ["bridge.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "web_accessible_resources": [{ "resources": ["accounts.json"], "matches": ["https://x.com/*", "https://twitter.com/*", "https://www.linkedin.com/*", "https://www.instagram.com/*", "https://www.reddit.com/*", "https://old.reddit.com/*"] }]
+}

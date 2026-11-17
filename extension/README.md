@@ -4,7 +4,7 @@ This extension gets real posts from X, LinkedIn, Instagram and Reddit into AI Fo
 
 - **It reads only pages you open yourself.** While you browse those sites in Chrome or Edge, it reads the posts already on your screen. It never loads pages on its own, scrolls, clicks, or sends requests to any site.
 - **It keeps only accounts on your list.** It saves posts from the 79 accounts and 7 subreddits in your list and ignores everything else.
-- **Your data stays in your browser.** Posts are stored in `chrome.storage.local`, up to 1,500 posts or 30 days. They're handed only to AI Follow Desk pages: localhost, a local copy in a folder named `ai-follow-desk`, or addresses you add on the **Connect app** page.
+- **Your data stays in your browser.** Posts are stored in `chrome.storage.local`, up to 1,500 posts or 30 days. They're handed only to AI Follow Desk pages: localhost, a local copy in a folder named `socioAI` or `ai-follow-desk`, or addresses you add on the **Connect app** page.
 
 ## Install
 
@@ -28,7 +28,7 @@ This extension gets real posts from X, LinkedIn, Instagram and Reddit into AI Fo
 
 - **Updates only arrive when you visit those pages.** Nothing is collected while the browser is closed.
 - **Site redesigns can break it.** The sites change their page structure without notice. Each site has its own extractor at the top of `capture.js`, and that's where a fix would go.
-- **The claude.ai preview may not work with it.** The published preview runs in a sandboxed frame the extension may not be able to reach. Use the self-hosted app (`server/`) or open `index.html` from a folder named `ai-follow-desk`. For a local file, also switch on **Allow access to file URLs** on the extension's details page.
+- **The claude.ai preview may not work with it.** The published preview runs in a sandboxed frame the extension may not be able to reach. Use the self-hosted app (`server/`) or open `index.html` from a folder named `socioAI` or `ai-follow-desk`. For a local file, also switch on **Allow access to file URLs** on the extension's details page.
 
 ## Rebuild the account list
 

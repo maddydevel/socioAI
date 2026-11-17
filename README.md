@@ -2,6 +2,8 @@
 
 A daily AI briefing and follow tracker for the 79 accounts and 7 subreddits in *The Follow List* (AI with Divyam), across X, LinkedIn, Instagram and Reddit.
 
+**Documentation:** start with [docs/README.md](docs/README.md). It covers [installation](docs/01-installation.md), [configuration](docs/02-configuration.md), the [user manual](docs/03-user-manual.md), [real-world scenarios](docs/04-scenarios.md) and [troubleshooting](docs/05-troubleshooting.md).
+
 | Part | What it does | Guide |
 |---|---|---|
 | `index.html` (built from `app.src.html`) | The app: Today feed by category, swipeable briefing, Accounts directory, Follow sprint, You (progress, accounts, theme) | this file |
